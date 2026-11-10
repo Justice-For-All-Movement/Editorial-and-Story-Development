@@ -532,12 +532,12 @@ export function createEngine(deps: EditorialDeps) {
     manifest,
 
     // ── revisioned objects (kind: series | collection | editorial_project | collaborator | viewpoint | asset | document) ──
-    create<K extends Kind>(ctx: ServiceContext, kind: K, input: { body: unknown; compartment?: string } & SaveOptions): Promise<Stored<K>> {
+    async create<K extends Kind>(ctx: ServiceContext, kind: K, input: { body: unknown; compartment?: string } & SaveOptions): Promise<Stored<K>> {
       requireCapability(ctx, 'editorial:write'); kindOf(kind);
       const { idempotencyKey, ...rest } = input;
       return sql.tx((tx) => idem(tx, ctx, idempotencyKey, { op: 'create', kind, ...rest }, () => write(tx, ctx, kind, null, null, input.body, rest)));
     },
-    revise<K extends Kind>(ctx: ServiceContext, kind: K, id: string, input: { expectedRevision: number; body: unknown } & SaveOptions): Promise<Stored<K>> {
+    async revise<K extends Kind>(ctx: ServiceContext, kind: K, id: string, input: { expectedRevision: number; body: unknown } & SaveOptions): Promise<Stored<K>> {
       requireCapability(ctx, 'editorial:write'); kindOf(kind);
       const { idempotencyKey, ...rest } = input;
       return sql.tx((tx) => idem(tx, ctx, idempotencyKey, { op: 'revise', kind, id, ...rest }, () => write(tx, ctx, kind, id, input.expectedRevision, input.body, rest)));
@@ -571,7 +571,7 @@ export function createEngine(deps: EditorialDeps) {
       return { ref: uref(EID, kind, id), from, to, fields: diffJson(ra, rb), blocks: diffBlocks(ba, bb) };
     },
     /** Restores an earlier revision as a NEW revision (history is never rewritten). The restored content is validated again. */
-    restore<K extends Kind>(ctx: ServiceContext, kind: K, id: string, input: { revision: number; expectedRevision: number } & SaveOptions): Promise<Stored<K>> {
+    async restore<K extends Kind>(ctx: ServiceContext, kind: K, id: string, input: { revision: number; expectedRevision: number } & SaveOptions): Promise<Stored<K>> {
       requireCapability(ctx, 'editorial:write'); kindOf(kind);
       const { idempotencyKey, revision, expectedRevision, ...rest } = input;
       return sql.tx((tx) => idem(tx, ctx, idempotencyKey, { op: 'restore', kind, id, revision, expectedRevision, ...rest }, async () => {
@@ -581,7 +581,7 @@ export function createEngine(deps: EditorialDeps) {
     },
 
     // ── review and approval ──
-    requestReview(ctx: ServiceContext, kind: Kind, id: string, input: { expectedRevision: number; note?: string; idempotencyKey?: string }): Promise<Stored> {
+    async requestReview(ctx: ServiceContext, kind: Kind, id: string, input: { expectedRevision: number; note?: string; idempotencyKey?: string }): Promise<Stored> {
       requireCapability(ctx, 'editorial:write'); kindOf(kind);
       return sql.tx((tx) => idem(tx, ctx, input.idempotencyKey, { op: 'requestReview', kind, id, expectedRevision: input.expectedRevision, note: input.note }, async () => {
         const l = await need(tx, ctx, kind, id, { lock: true });
@@ -594,7 +594,7 @@ export function createEngine(deps: EditorialDeps) {
         return stored(tx, ctx, await need(tx, ctx, kind, id));
       }));
     },
-    returnToDraft(ctx: ServiceContext, kind: Kind, id: string, input: { revision: number; note: string; idempotencyKey?: string }): Promise<Stored> {
+    async returnToDraft(ctx: ServiceContext, kind: Kind, id: string, input: { revision: number; note: string; idempotencyKey?: string }): Promise<Stored> {
       requireCapability(ctx, 'editorial:approve'); kindOf(kind);
       return sql.tx((tx) => idem(tx, ctx, input.idempotencyKey, { op: 'returnToDraft', kind, id, revision: input.revision, note: input.note }, async () => {
         const l = await need(tx, ctx, kind, id, { lock: true, revision: input.revision });
@@ -636,7 +636,7 @@ export function createEngine(deps: EditorialDeps) {
     },
 
     // ── comments, suggestions, assignments ──
-    addComment(ctx: ServiceContext, kind: Kind, id: string, input: { body: string; blockId?: string; idempotencyKey?: string }): Promise<Comment> {
+    async addComment(ctx: ServiceContext, kind: Kind, id: string, input: { body: string; blockId?: string; idempotencyKey?: string }): Promise<Comment> {
       requireCapability(ctx, 'editorial:comment'); kindOf(kind);
       return sql.tx((tx) => idem(tx, ctx, input.idempotencyKey, { op: 'comment', kind, id, body: input.body, blockId: input.blockId }, async () => {
         const l = await need(tx, ctx, kind, id);
@@ -648,7 +648,7 @@ export function createEngine(deps: EditorialDeps) {
       }));
     },
     /** A proposed block (replacement or insertion). Nothing changes in the document until a writer accepts it. */
-    suggest(ctx: ServiceContext, documentId: string, input: { block: unknown; blockId?: string; afterBlockId?: string; note?: string; idempotencyKey?: string }): Promise<Comment> {
+    async suggest(ctx: ServiceContext, documentId: string, input: { block: unknown; blockId?: string; afterBlockId?: string; note?: string; idempotencyKey?: string }): Promise<Comment> {
       requireCapability(ctx, 'editorial:comment');
       return sql.tx((tx) => idem(tx, ctx, input.idempotencyKey, { op: 'suggest', documentId, block: input.block, blockId: input.blockId, afterBlockId: input.afterBlockId, note: input.note }, async () => {
         const l = await need(tx, ctx, 'document', documentId);
@@ -667,7 +667,7 @@ export function createEngine(deps: EditorialDeps) {
       await need(sql, ctx, kindOf(kind), id);
       return (await sql.query(`select * from ${S}.comments where tenant_id=$1 and project_id=$2 and object_id=$3 and ($4::text is null or status=$4) and ($5::text is null or kind=$5) order by created_at, id`, [...scope(ctx), id, filter.status ?? null, filter.kind ?? null])).map(toComment);
     },
-    resolveComment(ctx: ServiceContext, commentId: string, input: { status: 'resolved' | 'rejected'; note?: string }): Promise<Comment> {
+    async resolveComment(ctx: ServiceContext, commentId: string, input: { status: 'resolved' | 'rejected'; note?: string }): Promise<Comment> {
       requireCapability(ctx, 'editorial:comment');
       return sql.tx(async (tx) => {
         const c = (await tx.query(`select * from ${S}.comments where tenant_id=$1 and project_id=$2 and id=$3 for update`, [...scope(ctx), uuid(commentId, 'commentId')]))[0] ?? notFound();
@@ -679,7 +679,7 @@ export function createEngine(deps: EditorialDeps) {
       });
     },
     /** Applies a suggestion as a new revision through the same label and source rules as any save. `relabel` lets the human set basis, sources, attribution and disclosure. */
-    acceptSuggestion(ctx: ServiceContext, suggestionId: string, input: { expectedRevision: number; relabel?: Record<string, unknown> } & SaveOptions): Promise<Stored<'document'>> {
+    async acceptSuggestion(ctx: ServiceContext, suggestionId: string, input: { expectedRevision: number; relabel?: Record<string, unknown> } & SaveOptions): Promise<Stored<'document'>> {
       requireCapability(ctx, 'editorial:write');
       const { idempotencyKey, expectedRevision, relabel, ...rest } = input;
       return sql.tx((tx) => idem(tx, ctx, idempotencyKey, { op: 'acceptSuggestion', suggestionId, expectedRevision, relabel, ...rest }, async () => {
@@ -693,7 +693,7 @@ export function createEngine(deps: EditorialDeps) {
         return saved;
       }));
     },
-    assign(ctx: ServiceContext, kind: Kind, id: string, input: { assigneeId: string; role: string; blockId?: string; note?: string; dueAt?: string; idempotencyKey?: string }): Promise<Assignment> {
+    async assign(ctx: ServiceContext, kind: Kind, id: string, input: { assigneeId: string; role: string; blockId?: string; note?: string; dueAt?: string; idempotencyKey?: string }): Promise<Assignment> {
       requireCapability(ctx, 'editorial:write'); kindOf(kind);
       return sql.tx((tx) => idem(tx, ctx, input.idempotencyKey, { op: 'assign', kind, id, assigneeId: input.assigneeId, role: input.role, blockId: input.blockId, note: input.note, dueAt: input.dueAt }, async () => {
         await need(tx, ctx, kind, id);
@@ -710,7 +710,7 @@ export function createEngine(deps: EditorialDeps) {
         [...scope(ctx), [...ctx.compartments], filter.objectId === undefined ? null : uuid(filter.objectId, 'objectId'), filter.assigneeId ?? null, filter.status ?? null]);
       return rows.map(toAssignment);
     },
-    updateAssignment(ctx: ServiceContext, assignmentId: string, input: { status: 'open' | 'done' | 'cancelled' }): Promise<Assignment> {
+    async updateAssignment(ctx: ServiceContext, assignmentId: string, input: { status: 'open' | 'done' | 'cancelled' }): Promise<Assignment> {
       requireCapability(ctx, 'editorial:write');
       return sql.tx(async (tx) => {
         const a = (await tx.query(`select * from ${S}.assignments where tenant_id=$1 and project_id=$2 and id=$3 for update`, [...scope(ctx), uuid(assignmentId, 'assignmentId')]))[0] ?? notFound();
@@ -729,7 +729,7 @@ export function createEngine(deps: EditorialDeps) {
         [...scope(ctx), [...ctx.compartments], filter.objectId === undefined ? null : uuid(filter.objectId, 'objectId'), filter.status ?? null, filter.kind ?? null])).map(toFlag);
     },
     /** Closes a stale flag on a human's recorded judgement. A blocked flag closes only when the withdrawn reference is gone from the block (by revising). */
-    resolveFlag(ctx: ServiceContext, flagId: string, input: { resolution: 'reviewed_still_accurate' | 'revised'; note: string }): Promise<Flag> {
+    async resolveFlag(ctx: ServiceContext, flagId: string, input: { resolution: 'reviewed_still_accurate' | 'revised'; note: string }): Promise<Flag> {
       requireCapability(ctx, 'editorial:write');
       return sql.tx(async (tx) => {
         const f = (await tx.query(`select * from ${S}.flags where tenant_id=$1 and project_id=$2 and id=$3 for update`, [...scope(ctx), uuid(flagId, 'flagId')]))[0] ?? notFound();
@@ -744,7 +744,7 @@ export function createEngine(deps: EditorialDeps) {
 
     // ── translations ──
     /** Creates a translation variant pinned to a source revision. Blocks name the source block they translate; labels and sources are inherited. */
-    createTranslation(ctx: ServiceContext, input: { sourceDocumentId: string; sourceRevision?: number; language: string; title: string; blocks: readonly unknown[]; compartment?: string } & SaveOptions): Promise<Stored<'document'>> {
+    async createTranslation(ctx: ServiceContext, input: { sourceDocumentId: string; sourceRevision?: number; language: string; title: string; blocks: readonly unknown[]; compartment?: string } & SaveOptions): Promise<Stored<'document'>> {
       requireCapability(ctx, 'editorial:write');
       const { idempotencyKey, sourceDocumentId, sourceRevision, language, title, blocks, ...rest } = input;
       return sql.tx((tx) => idem(tx, ctx, idempotencyKey, { op: 'createTranslation', sourceDocumentId, sourceRevision, language, title, blocks, ...rest }, async () => {
@@ -862,7 +862,7 @@ export function createEngine(deps: EditorialDeps) {
 
     // ── authoring help ──
     /** Builds a first draft from an E08 investigation package. Labels and sources come from the package; the draft is saved through the normal rules. */
-    generate(ctx: ServiceContext, input: { generator: GeneratorName; editorialProjectId: string; package: unknown; viewpointIds?: readonly string[]; title?: string; language?: string; lineSyllables?: number; compartment?: string } & SaveOptions): Promise<{ document: Stored<'document'>; omitted: { ref: string; reason: string }[] }> {
+    async generate(ctx: ServiceContext, input: { generator: GeneratorName; editorialProjectId: string; package: unknown; viewpointIds?: readonly string[]; title?: string; language?: string; lineSyllables?: number; compartment?: string } & SaveOptions): Promise<{ document: Stored<'document'>; omitted: { ref: string; reason: string }[] }> {
       requireCapability(ctx, 'editorial:write');
       const { idempotencyKey, ...rest } = input;
       return sql.tx((tx) => idem(tx, ctx, idempotencyKey, { op: 'generate', ...rest }, async () => {

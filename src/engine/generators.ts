@@ -73,7 +73,8 @@ export function parsePackage(raw: unknown, o: Pick<GenerateOptions, 'templates' 
     if (finding !== undefined) { if (!dated.includes(finding)) { finding.date = e.at; dated.push(finding); } continue; }
     const sources = [e.claimRef, ...(Array.isArray(e.sources) ? e.sources.filter(validRef) : [])].filter((s, i, a) => a.indexOf(s) === i);
     const label = e.label === 'established' ? 'established' : e.label === 'disputed' ? 'disputed' : 'unknown';
-    dated.push({ key: `${e.claimRef}#${e.at}`, group: label, basis: label === 'established' ? 'verified_fact' : label === 'disputed' ? 'allegation' : 'unknown_acknowledged', text: e.description, sources, sourceSelectors: {}, claimIds: [bare(e.claimRef)], date: e.at, ...(label === 'disputed' ? { attribution: t.disputedAttribution as string } : {}) });
+    const entry: PackageItem = { key: `${e.claimRef}#${e.at}`, group: label, basis: label === 'established' ? 'verified_fact' : label === 'disputed' ? 'allegation' : 'unknown_acknowledged', text: e.description, sources, sourceSelectors: {}, claimIds: [bare(e.claimRef)], date: e.at, ...(label === 'disputed' ? { attribution: t.disputedAttribution as string } : {}) };
+    dated.push(entry); items.push(entry);
   }
   let account: PackageItem | null = null;
   if (isRec(c.originalAccount) && typeof c.originalAccount.summary === 'string' && c.originalAccount.summary.trim() !== '') {
@@ -130,6 +131,7 @@ export function generate(name: GeneratorName, pkg: ParsedPackage, viewpoints: re
     const verses = ordered.filter((i) => i.group !== 'unknown');
     verses.forEach((i, n) => { add(section(i, 'verse', `Verse ${n + 1}`)); if (n === 0) add(chorus(), 'chorus-1'); });
     pkg.items.filter((i) => i.group === 'unknown').forEach((i, n) => add(section(i, 'bridge', `Bridge ${n + 1}`)));
+    for (const v of withSummary) { const d = viewpointDraft(v, 'lyric_section', { part: 'spoken', label: v.body.label }, name); if (d !== null) add({ ...d, text: wrapBySyllables(d.text, target, data).join('\n') }); }
     if (verses.length > 1) add(chorus(), 'chorus-2');
   } else if (name === 'script' || name === 'storyboard') {
     const scenes = new Map<string, PackageItem[]>();
@@ -148,9 +150,12 @@ export function generate(name: GeneratorName, pkg: ParsedPackage, viewpoints: re
       else add(viewpointDraft(v, 'scene', { purpose: fill(t.scenePurpose as string, { label: v.body.label }), participants: [v.body.label], panels: [{ id: 'p1', description: t.panelPending as string, assetRefs: [] }] }, name));
     }
   } else if (name === 'interactive') {
-    const threads = groups.map(({ g, items }) => ({ g, keys: items.map((_i, n) => `${g}-${n + 1}`), items }));
-    add(connective('story_node', t.startNode as string, { key: 'start', start: true, choices: threads.length === 0 ? [{ label: t.finish as string, to: 'end' }] : threads.map((th) => ({ label: t[th.g] as string, to: th.keys[0] as string })) }), 'start');
-    for (const th of threads) th.items.forEach((i, n) => add(item(i, 'story_node', { key: th.keys[n] as string, choices: n + 1 < th.items.length ? [{ label: t.continue as string, to: th.keys[n + 1] as string }] : [{ label: t.backToStart as string, to: 'start' }, { label: t.finish as string, to: 'end' }] }, name), th.keys[n] as string));
+    type Thread = { g: string; label: string; keys: string[]; drafts: (key: string, choices: Json) => (Draft | null)[] };
+    const exits = (keys: string[], n: number): Json => (n + 1 < keys.length ? [{ label: t.continue as string, to: keys[n + 1] as string }] : [{ label: t.backToStart as string, to: 'start' }, { label: t.finish as string, to: 'end' }]);
+    const threads: Thread[] = groups.map(({ g, items }) => ({ g, label: t[g] as string, keys: items.map((_i, n) => `${g}-${n + 1}`), drafts: (key, choices) => [item(items[Number(key.split('-').pop()) - 1] as PackageItem, 'story_node', { key, choices }, name)] }));
+    if (withSummary.length > 0) threads.push({ g: 'viewpoints', label: t.viewpoints as string, keys: withSummary.map((_v, n) => `viewpoint-${n + 1}`), drafts: (key, choices) => [viewpointDraft(withSummary[Number(key.split('-').pop()) - 1] as GeneratorViewpoint, 'story_node', { key, choices }, name)] });
+    add(connective('story_node', t.startNode as string, { key: 'start', start: true, choices: threads.length === 0 ? [{ label: t.finish as string, to: 'end' }] : threads.map((th) => ({ label: th.label, to: th.keys[0] as string })) }), 'start');
+    for (const th of threads) th.keys.forEach((key, n) => { for (const d of th.drafts(key, exits(th.keys, n))) add(d, key); });
     add(connective('story_node', t.endNode as string, { key: 'end', ending: 'end' }), 'end');
   } else {
     const v = viewpoints[0];
