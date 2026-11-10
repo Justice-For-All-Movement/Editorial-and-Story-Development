@@ -23,7 +23,7 @@ export const BUILTIN_LANGUAGES: Readonly<Record<string, LanguageData>> = {
     mode: 'vowel_groups', vowels: 'aeiouy', drop: ['e$'],
     subtract: ['cial', 'tia', 'cius', 'cious', 'giu', 'ion', 'iou', 'sia$', '.ely$', '[^aeioutdy]ed$', '[^aeiousxzh]es$'],
     add: ['ia', 'riet', 'dien', 'iu', 'io', 'ii', '[aeiouym]bl$', '[aeiou]{3}', '^mc', 'ism$', '([^aeiouy])\\1l$', '[^l]lien', '^coa[dglx].', '[^gq]ua[^auieo]', 'dnt$'],
-    exceptions: { the: 1, one: 1, once: 1, are: 1, were: 1, where: 1, there: 1, here: 1, give: 1, have: 1, some: 1, come: 1, done: 1, gone: 1, love: 1, move: 1, fire: 1, hour: 1, our: 1, every: 2, evening: 2, different: 2, business: 2, people: 2, being: 2, doing: 2, going: 2, idea: 3, area: 3, real: 1, poem: 2, quiet: 2, science: 2, create: 2, created: 3, eye: 1, eyes: 1, queue: 1, something: 2, sometimes: 2, somewhere: 2, everyone: 3, everything: 3, family: 3, evidence: 3, justice: 2, silence: 2, promise: 2, office: 2, notice: 2, answer: 2, minute: 2, people_s: 2 },
+    exceptions: { the: 1, one: 1, once: 1, are: 1, were: 1, where: 1, there: 1, here: 1, give: 1, have: 1, some: 1, come: 1, done: 1, gone: 1, love: 1, move: 1, fire: 1, hour: 1, our: 1, every: 2, evening: 2, different: 2, business: 2, people: 2, being: 2, doing: 2, going: 2, idea: 3, area: 3, real: 1, poem: 2, quiet: 2, science: 2, create: 2, created: 3, eye: 1, eyes: 1, queue: 1, something: 2, sometimes: 2, somewhere: 2, everyone: 3, everything: 3, family: 3, evidence: 3, justice: 2, silence: 2, promise: 2, office: 2, notice: 2, answer: 2, minute: 2, beautiful: 3, beauty: 2 },
     rhymeRewrites: [['ight$', 'ite'], ['eigh', 'ay'], ['tion$', 'shun'], ['sion$', 'shun'], ['ck', 'k'], ['ph', 'f'], ['([^aeiou])y([^aeiou])e$', '$1i$2e'], ['ey$', 'ay'], ['ea([dt])$', 'ee$1'], ['oo', 'u'], ['ould$', 'ood'], ['ough$', 'o'], ['aid$', 'ade'], ['ain$', 'ane'], ['ail$', 'ale'], ['ow$', 'o'], ['ew$', 'u'], ['ue$', 'u']],
   },
   es: { mode: 'strong_weak', vowels: 'aeiouáéíóúüy', strong: 'aeoáéóíú', rhymeRewrites: [['v', 'b'], ['z', 's'], ['ll', 'y'], ['á', 'a'], ['é', 'e'], ['í', 'i'], ['ó', 'o'], ['ú', 'u']] },
@@ -46,7 +46,6 @@ export function syllablesInWord(word: string, d: LanguageData): number {
   let w = letters(word);
   if (w === '') return 0;
   const known = d.exceptions?.[w]; if (known !== undefined) return known;
-  const original = w;
   for (const p of d.drop ?? []) { const r = safeRegex(p); if (r !== null) w = w.replace(r, ''); }
   const v = esc(d.vowels);
   let count: number;
@@ -56,8 +55,8 @@ export function syllablesInWord(word: string, d: LanguageData): number {
     if (d.mode === 'vowel_groups') count = runs.length;
     else { const strong = d.strong ?? d.vowels; count = runs.reduce((n, run) => n + Math.max(1, [...run].filter((c) => strong.includes(c)).length), 0); }
   }
-  for (const p of d.subtract ?? []) { const r = safeRegex(p); if (r !== null && r.test(original)) count--; }
-  for (const p of d.add ?? []) { const r = safeRegex(p); if (r !== null && r.test(original)) count++; }
+  for (const p of d.subtract ?? []) { const r = safeRegex(p); if (r !== null && r.test(w)) count--; }
+  for (const p of d.add ?? []) { const r = safeRegex(p); if (r !== null && r.test(w)) count++; }
   return Math.max(1, count);
 }
 export const wordsOf = (text: string): string[] => text.match(/[\p{L}][\p{L}'’-]*/gu) ?? [];
