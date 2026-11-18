@@ -463,16 +463,14 @@
     },
     {
       "id": "export-final-visibility",
-      "status": "reviewed qualified runtime; final documentation-head CI/rules/expected-head merge pending",
+      "status": "accepted PR8; historical candidate pending notes superseded",
       "baseCommit": "4387e05b7a33305509fba962ac7aae83c1635413",
       "regressionCommit": "655c669d7c7d89a80b9d6127affe4b2e350d65d6",
       "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/8",
       "documentation": "docs/EXPORT_FINAL_VISIBILITY.md",
       "local": "typecheck passed on prepared dependencies; no local PG/full or installed result",
       "remaining": [
-        "fresh final documentation-head full/peer checks/rules/expected merge",
-        "source review/fresh head checks/rules/expected merge",
-        "final upstream rights/approvals/withdrawal/recursive source mapping and host human/lifecycle/unknown storage qualification"
+        "final upstream SourceConsent/factual checks, current original-human authority, recursive dependencies, host qualification and non-atomic orphan uncertainty remain separate"
       ],
       "limits": "conservative ALL historical project credits visibility in final coherent own snapshot, bounded1024revisions/512KiB/1024collaborators/viewpoints; own snapshot not continuous auth/whole-source/distributed fencing; retain all history/unknown outputs",
       "runtimeCommit": "54e21589a9055b637ef3b0dbd42fb84f0e00fd98",
@@ -501,7 +499,37 @@
         "cancelled": 0,
         "skips": 0
       },
-      "sourceReview": "clear for final coherent read-only own visibility, bounded ALL historical contributors and original effects; conservative denial and no whole-source/current-human/fence claims explicit"
+      "sourceReview": "clear for final coherent read-only own visibility, bounded ALL historical contributors and original effects; conservative denial and no whole-source/current-human/fence claims explicit",
+      "sourceCommit": "015c2bf35fde33fde6fa7a0e5746ca1f8957ba89",
+      "mergeCommit": "5bfdc24679926ce474124a534c78ba9a84911a6c",
+      "finalCi": {
+        "ordinaryJob": 135166154222,
+        "ordinaryTests": 64,
+        "focusedJob": 135166154908,
+        "focusedSourceTests": 14,
+        "normalFreshInstalledPublicEngineTests": 14,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "knowledgeJob": 135166154962,
+        "factualJob": 135166155063,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
+    },
+    {
+      "id": "final-export-own-admission",
+      "status": "incomplete WIP baseline tests only; no runtime correction",
+      "baseCommit": "5bfdc24679926ce474124a534c78ba9a84911a6c",
+      "documentation": "docs/EXPORT_FINAL_ADMISSION.md",
+      "local": "typecheck using prepared dependencies; no local PostgreSQL/fresh install/full suite claim",
+      "remaining": [
+        "baseline actual owning-PG source evidence",
+        "final own recorded withdrawals/blocked flags/required approvals correction",
+        "source/normal installed qualification, review/final-head CI/rules/expected-head merge",
+        "final external rights and original-human/recursive dependencies/host acceptance remain separate"
+      ]
     }
   ],
   "approvedDesignSha256": {
