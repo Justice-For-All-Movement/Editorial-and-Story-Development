@@ -355,17 +355,42 @@
     },
     {
       "id": "export-disclosure-authority",
-      "status": "incomplete WIP; local strict-admission group/typecheck/build pass; actual PG source-installed/current-head CI review merge pending",
+      "status": "reviewed qualified runtime candidate; final documentation-head CI/rules/expected-head merge pending",
       "baseCommit": "91c1e22100270e194cbca41d2dcbaf494e6f51b2",
       "regressionCommit": "9b85f2a99c21041f5c11fba6dd3bee3b5a75a4fa",
       "documentation": "docs/EXPORT_DISCLOSURE_AUTHORITY.md",
       "verification": "docs/export-disclosure-authority-verification.json",
       "remaining": [
-        "actual four-group PG source/normal-installed and existing peer CI",
+        "final documentation-head current checks/rules/expected-head merge",
         "fresh source review/rules/current-head expected merge",
         "whole-source/own visibility/recursive E09 dependency and host human/rights/lifecycle acceptance"
       ],
-      "limits": "synthetic host authorization only; final denial retains committed history; initial absent port remains optional; unknown SQL/storage not rollback; no distributed fence or cleanup"
+      "limits": "synthetic host authorization only; final denial retains committed history; initial absent port remains optional; unknown SQL/storage not rollback; no distributed fence or cleanup",
+      "runtimeCommit": "76d8b49675e24b1d29ec681096ea6fb08d85ccd3",
+      "baseline": {
+        "ordinaryJob": 135011402550,
+        "tests": 54,
+        "passes": 50,
+        "failures": 4,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "qualifiedCi": {
+        "ordinaryJob": 135012509872,
+        "ordinaryTests": 54,
+        "consentAndAuthorityJob": 135012510438,
+        "focusedSourceTests": 4,
+        "focusedFreshInstalledPublicEngineTests": 4,
+        "actualE11SourceTests": 1,
+        "actualE11FreshInstalledPublicServeTests": 1,
+        "knowledgeJob": 135012510472,
+        "factualJob": 135012510275,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear for strict captured method/receiver, fresh pre-SQL/post-COMMIT decisions, no deletion/retry/history rewrite and retained identical ACK; current human/whole rights/fencing not claimed"
     }
   ],
   "approvedDesignSha256": {

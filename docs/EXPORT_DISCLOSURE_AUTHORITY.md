@@ -6,7 +6,11 @@ The final check covers new exports, identical cached acknowledgements, configure
 
 ## Qualification checkpoint
 
-Base is accepted PR5 merge `91c1e22100270e194cbca41d2dcbaf494e6f51b2`. Regression-only source `9b85f2a99c21041f5c11fba6dd3bee3b5a75a4fa` retains the baseline for strict admission/post-store/post-COMMIT cases; its raw CI outcome must be inspected, not inferred. Local focused strict-admission group passes (one test, zero failures/cancellations/skips); typecheck and build pass using copied prepared dependencies. No local PostgreSQL or full/installed ordinary-suite claim. CI adds all four focused groups on actual separate disposable PostgreSQL databases through source and a normally freshly installed public-engine tarball; existing real E07/E08/E11 chains remain intact. Current-head CI/review/rules/expected-head merge are pending at this source checkpoint. SHA manifest: `export-disclosure-authority-verification.json`.
+Base is accepted PR5 merge `91c1e22100270e194cbca41d2dcbaf494e6f51b2`. Regression-only source `9b85f2a99c21041f5c11fba6dd3bee3b5a75a4fa`, raw jobs `135011402550` and `135011307431`, reproduced all four new failures: 54 tests, 50 passes, 4 failures, zero cancellations/skips. Malformed truthy admission reached SQL; all three post-operation denial assertions lacked an expected rejection.
+
+Runtime source `76d8b49675e24b1d29ec681096ea6fb08d85ccd3` passes all eight head checks. Raw `135012509872`: all 54 ordinary tests pass, zero failures/cancellations/skips. Raw `135012510438`: four focused source tests (one synthetic pre-SQL, three actual own-PG groups), the actual E11 source test, actual E11 normally freshly installed public-serve test, and all four focused installed public-engine tests pass, each with zero failures/cancellations/skips. Raw Knowledge `135012510472` and Factual `135012510275` retain their actual pinned source/fresh-installed peer checks. No combined E01 human/whole-rights qualification is inferred.
+
+Local focused strict-admission group passes (one test, zero failures/cancellations/skips); typecheck, build and original-registry validation pass using copied prepared dependencies. No local PostgreSQL, full-local or full-installed 54-test ordinary-suite claim. Source review is clear for captured strict authority/fresh post-COMMIT withholding and retained one-effect replay; final documentation-head CI/rules/expected-head merge remain pending at this checkpoint. SHA manifest: `export-disclosure-authority-verification.json`.
 
 ## Limits and remaining work
 

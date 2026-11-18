@@ -3,7 +3,7 @@
     "src/engine/index.ts": "c7189bea18075f95f7424d9091f28ba7bf67ee288258534388cdbfea3c9f0ec3",
     "tests/export-authority.test.ts": "2720ea384b8ce6d39f3b03874c1f1692d4bc9784b98fcfd6ecbd22354c8630bc",
     ".github/workflows/ci.yml": "221a357c4d59b318bae8f92e47bb7599ba165e45678dbbc86160861f53a04434",
-    "docs/EXPORT_DISCLOSURE_AUTHORITY.md": "523ed7021e4c5ba5b871ecb0ef8903471ac09b2c08950e127e974436e35218bb",
+    "docs/EXPORT_DISCLOSURE_AUTHORITY.md": "493a65182d91a3b9b80d4e9b30db0c4fa34ad9863ffab4c6ab9270945e1c37e5",
     "docs/ENGINE_API.md": "7fea546ffb75f6b8a76781d2f39d8fd186be8b62d6a15152c31630a36af51062"
   }
 }
