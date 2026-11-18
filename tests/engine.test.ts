@@ -646,3 +646,28 @@ test('E08 findings cannot be empty-success verified facts and current metadata i
   }
   assert.equal((await e.get(ctx(), 'document', id)).revision, 1, 'current finding checks never rewrite saved text');
 }));
+
+test('non-testimony source Consent denies both new and cached private exports without extra effects', needsPg, () => db(async sql => {
+  const u = useDecisions(); const e = make(sql, { ports: { knowledge: knowledge(), useDecisions: u } });
+  const { id } = await doc(e, [block('f')]);
+  const options = { idempotencyKey: 'all-source-permission' };
+  const original = await e.exportDocument(ctx(), id, 1, options);
+  u.deny.add(CLAIM_CONTRACT);
+  await assert.rejects(e.exportDocument(ctx(), id, 1), fails('consent_denied'));
+  await assert.rejects(e.exportDocument(ctx(), id, 1, options), fails('consent_denied'));
+  const retained = await e.listExports(ctx(), id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
+  assert.equal((await events(e, ctx(), 'editorial.exported')).length, 1);
+  assert.equal((await e.get(ctx(), 'document', id)).revision, 1);
+}));
+
+test('registered asset target and rights references require export Consent even without testimony', needsPg, () => db(async sql => {
+  const u = useDecisions(); const e = make(sql, { ports: { knowledge: knowledge(), useDecisions: u } });
+  const targetRef = 'E10:asset:fictional-title@1', rightsRef = 'E11:permission:fictional-title@1';
+  const asset = await e.create(ctx(), 'asset', { body: { title: 'Fictional title', targetRef, mediaKind: 'image', provenance: 'original_production', rightsRef } });
+  await e.requestReview(ctx(), 'asset', asset.id, { expectedRevision: 1 }); await e.approve(editor(), 'asset', asset.id, { revision: 1 });
+  const { id } = await doc(e, [block('s', { type: 'scene', basis: 'invention', sources: [], disclosure: 'Invented title card.', data: { purpose: 'Opening', panels: [{ id: 'p1', description: 'Title', assetRefs: [`E09:asset:${asset.id}`] }] } })], { docType: 'storyboard' });
+  for (const ref of [targetRef, rightsRef]) {
+    u.deny.add(ref); await assert.rejects(e.exportDocument(ctx(), id, 1), fails('consent_denied')); u.deny.clear();
+  }
+  assert.equal((await e.listExports(ctx(), id)).length, 0);
+}));
