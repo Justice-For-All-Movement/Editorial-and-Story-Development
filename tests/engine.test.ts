@@ -646,3 +646,71 @@ test('E08 findings cannot be empty-success verified facts and current metadata i
   }
   assert.equal((await e.get(ctx(), 'document', id)).revision, 1, 'current finding checks never rewrite saved text');
 }));
+
+test('non-testimony source Consent denies both new and cached private exports without extra effects', needsPg, () => db(async sql => {
+  const u = useDecisions(); const e = make(sql, { ports: { knowledge: knowledge(), useDecisions: u } });
+  const { id } = await doc(e, [block('f')]);
+  const options = { idempotencyKey: 'all-source-permission' };
+  const original = await e.exportDocument(ctx(), id, 1, options);
+  u.deny.add(CLAIM_CONTRACT);
+  await assert.rejects(e.exportDocument(ctx(), id, 1), fails('consent_denied'));
+  await assert.rejects(e.exportDocument(ctx(), id, 1, options), fails('consent_denied'));
+  const retained = await e.listExports(ctx(), id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
+  assert.equal((await events(e, ctx(), 'editorial.exported')).length, 1);
+  assert.equal((await e.get(ctx(), 'document', id)).revision, 1);
+}));
+
+test('registered asset target and rights references require export Consent even without testimony', needsPg, () => db(async sql => {
+  const u = useDecisions(); const e = make(sql, { ports: { knowledge: knowledge(), useDecisions: u } });
+  const targetRef = 'E10:asset:fictional-title@1', rightsRef = 'E11:permission:fictional-title@1';
+  const asset = await e.create(ctx(), 'asset', { body: { title: 'Fictional title', targetRef, mediaKind: 'image', provenance: 'original_production', rightsRef } });
+  await e.requestReview(ctx(), 'asset', asset.id, { expectedRevision: 1 }); await e.approve(editor(), 'asset', asset.id, { revision: 1 });
+  const { id } = await doc(e, [block('s', { type: 'scene', basis: 'invention', sources: [], disclosure: 'Invented title card.', data: { purpose: 'Opening', panels: [{ id: 'p1', description: 'Title', assetRefs: [`E09:asset:${asset.id}`] }] } })], { docType: 'storyboard' });
+  for (const ref of [targetRef, rightsRef]) {
+    u.deny.add(ref); await assert.rejects(e.exportDocument(ctx(), id, 1), fails('consent_denied')); u.deny.clear();
+  }
+  assert.equal((await e.listExports(ctx(), id)).length, 0);
+}));
+
+test('all-source export retains literal adapt review, rejects unknown decisions and sanitizes host errors', needsPg, () => db(async sql => {
+  const { id } = await doc(make(sql), [block('f')]);
+  let mode = 'review'; let calls = 0;
+  const reader = make(sql, { ports: { useDecisions: { async decide(_ctx, request) {
+    calls++; assert.deepEqual(request.subjects, [CLAIM_CONTRACT]);
+    if (mode === 'throw') throw new DomainError('private_host_code', 'SYNTHETIC_PRIVATE_DIAGNOSTIC');
+    return { decision: mode as 'review', reasons: [], permissionRefs: [], restrictions: [], decidedAt: ctx().now };
+  } } } });
+  const reviewed = await reader.exportDocument(ctx(), id, 1);
+  assert.equal((reviewed.manifest.useDecisions[0] as any).decision, 'review', 'a private review draft is never relabelled allow');
+  await assert.rejects(reader.exportDocument(ctx(), id, 1, { intendedUse: 'publish' }), fails('consent_denied', /review/));
+  mode = 'unexpected'; await assert.rejects(reader.exportDocument(ctx(), id, 1), fails('unavailable'));
+  mode = 'throw'; await assert.rejects(reader.exportDocument(ctx(), id, 1), e => e instanceof DomainError && e.code === 'consent_denied' && !String(e).includes('SYNTHETIC_PRIVATE_DIAGNOSTIC'));
+  assert.equal(calls, 4); assert.equal((await reader.listExports(ctx(), id)).length, 1);
+}));
+
+test('all-source request rejects the whole over-budget dependency set before calling Consent', needsPg, () => db(async sql => {
+  const u = useDecisions(); const e = make(sql, { ports: { useDecisions: u } });
+  const blocks = Array.from({ length: 5 }, (_, b) => block(`i${b}`, { basis: 'inference', sources: Array.from({ length: b === 4 ? 41 : 40 }, (_, n) => `E07:claim:fictional-${b}-${n}@1`) }));
+  const { id } = await doc(e, blocks); const before = u.calls.length;
+  await assert.rejects(e.exportDocument(ctx(), id, 1), fails('unavailable', /budget/));
+  assert.equal(u.calls.length, before); assert.equal((await e.listExports(ctx(), id)).length, 0);
+  const within = await doc(e, blocks.slice(0, 4));
+  const exported = await e.exportDocument(ctx(), within.id, 1);
+  const subjects = (exported.manifest.useDecisions[0] as any).subjects;
+  assert.equal(subjects.length, 160); assert.deepEqual(subjects, [...subjects].sort()); assert.equal(new Set(subjects).size, 160);
+}));
+
+test('export captures original caller scope and options before host callbacks mutate their owners', needsPg, () => db(async sql => {
+  const { id } = await doc(make(sql), [block('f')]);
+  const caller = { ...ctx() }; const options = { audience: 'private-review', formats: ['markdown'] as ('markdown' | 'fountain')[] };
+  const e = make(sql, { ports: { authorization: { async authorize(current) {
+    assert.equal(current.tenantId, 't1'); caller.tenantId = 'other'; options.audience = 'other'; options.formats[0] = 'fountain';
+    return { allowed: true, reason: 'fictional host', policyVersion: 'fixture' };
+  } }, useDecisions: { async decide(current, request) {
+    assert.equal(current.tenantId, 't1'); assert.equal(request.audience, 'private-review'); assert.ok(Object.isFrozen(request.subjects));
+    return { decision: 'allow', reasons: [], permissionRefs: [], restrictions: [], decidedAt: current.now };
+  } } } });
+  const exported = await e.exportDocument(caller, id, 1, options);
+  assert.deepEqual(exported.manifest.formats, ['markdown']); assert.ok(exported.renderings.markdown); assert.equal(exported.renderings.fountain, undefined);
+  assert.equal((await e.listExports(ctx(), id)).length, 1);
+}));

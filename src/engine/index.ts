@@ -832,6 +832,9 @@ export function createEngine(deps: EditorialDeps) {
     // ── exports for E10 / E12 ──
     /** Exports exactly one revision with a manifest of everything it depends on. Refused while withdrawn or blocked material is in that revision. */
     async exportDocument(ctx: ServiceContext, documentId: string, revision: number, options: { formats?: readonly ExportFormat[]; requireApproved?: boolean; intendedUse?: 'adapt' | 'publish'; audience?: string; territory?: string; destination?: string; idempotencyKey?: string } = {}): Promise<ExportResult> {
+      ctx = Object.freeze({ ...ctx, actor: Object.freeze({ ...ctx.actor, roles: Object.freeze([...ctx.actor.roles]) }),
+        capabilities: Object.freeze([...ctx.capabilities]), compartments: Object.freeze([...ctx.compartments]) });
+      options = Object.freeze({ ...options, ...(options.formats === undefined ? {} : { formats: Object.freeze([...options.formats]) }) });
       requireCapability(ctx, 'editorial:export');
       if (ports.authorization !== undefined) { const a = await ports.authorization.authorize(ctx, { capability: 'editorial:export', resource: uref(EID, 'document', UUID.test(documentId) ? documentId : 'unknown') }); if (!a.allowed) throw new DomainError('forbidden', 'Export is not authorized'); }
       const { idempotencyKey, ...rest } = options;
@@ -851,15 +854,27 @@ export function createEngine(deps: EditorialDeps) {
         if (options.requireApproved === true) invariant(approval !== null && approval.status === 'active' && approval.digest === l.r.digest, 'approval_invalid', approval === null ? `Revision ${l.r.revision} has no approval` : `The approval of revision ${l.r.revision} is ${approval.status}`);
         const view = await exportView(tx, ctx, l);
         const intendedUse: UseAction = options.intendedUse === 'publish' ? 'publish' : 'adapt';
-        const useDecisions: Json[] = []; const asked = new Set<string>();
-        for (const b of body.blocks) {
-          const v = b.viewpointId === undefined ? undefined : view.viewpoints.get(b.viewpointId);
-          const subjects = v !== undefined ? [v.participantRef, ...v.testimonyRefs] : b.basis === 'attributed_testimony' ? b.sources.filter(isTestimony) : [];
-          const key = [...subjects].sort().join('|');
-          if (subjects.length === 0 || asked.has(key)) continue; asked.add(key);
-          const d = await useDecision(ctx, subjects, intendedUse, pack({ audience: options.audience, territory: options.territory, destination: options.destination }));
-          if (intendedUse === 'publish' && isRec(d) && d.decision === 'review') throw new DomainError('consent_denied', `Publishing block ${b.id} requires a consent review that has not been completed`);
-          useDecisions.push(d);
+        // Every recorded external dependency matters, whatever the block's editorial basis label.
+        // Keep saved obligations as well as currently loaded viewpoint dependencies; never truncate.
+        const subjects = [...new Set([...linkRows.map(r => r.ref), ...[...view.viewpoints.values()].flatMap(v =>
+          [v.participantRef, v.consentRef, ...v.testimonyRefs])])].filter(ref => parseUref(ref).engine !== EID).sort();
+        const extra = pack({ audience: options.audience, territory: options.territory, destination: options.destination });
+        invariant(subjects.length <= 200 && Buffer.byteLength(JSON.stringify({ subjects, action: intendedUse, purpose: ctx.purpose, ...extra }), 'utf8') <= 65536,
+          'unavailable', 'Export dependencies exceed the complete decision request budget');
+        const useDecisions: Json[] = [];
+        if (subjects.length > 0) {
+          let decision: Json;
+          try { decision = await useDecision(ctx, Object.freeze([...subjects]), intendedUse, extra); }
+          catch (error) {
+            throw new DomainError(error instanceof DomainError && error.code === 'unavailable' ? 'unavailable' : 'consent_denied',
+              'Current permission for all declared export dependencies could not be obtained');
+          }
+          invariant(isRec(decision) && (decision.decision === 'allow' || decision.decision === 'review'
+            || (ports.useDecisions === undefined && cfg.standalone?.useDecisions === true && decision.decision === 'not_checked')),
+            'unavailable', 'Export received an invalid use decision');
+          // Existing private adapt review remains explicitly review; it is not an allow or a publication permit.
+          if (intendedUse === 'publish' && decision.decision === 'review') throw new DomainError('consent_denied', 'Publishing requires a consent review that has not been completed');
+          useDecisions.push(decision);
         }
         return idem(tx, ctx, idempotencyKey, { op: 'export', documentId, revision, ...rest }, async () => {
           const renderings: ExportResult['renderings'] = {};

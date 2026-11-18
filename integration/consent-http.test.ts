@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { once } from 'node:events';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -49,7 +50,9 @@ test('standalone Editorial uses real Consent HTTP and denies an old private draf
       await withDisposableDatabase(pg, admin, async (editorialUrl) => {
         const folder = await mkdtemp(join(tmpdir(), 'editorial-consent-'));
         const file = join(folder, 'service-token'); await writeFile(file, service, { mode: 0o600 });
-        const child = spawn(process.execPath, ['src/engine/serve.ts'], { stdio: ['ignore', 'pipe', 'pipe'], env: {
+        const entry = process.env.EDITORIAL_PACKAGE_ROOT === undefined ? 'src/engine/serve.ts'
+          : createRequire(resolve(process.env.EDITORIAL_PACKAGE_ROOT, 'package.json')).resolve('@accountability/editorial-story/serve');
+        const child = spawn(process.execPath, [entry], { stdio: ['ignore', 'pipe', 'pipe'], env: {
           PATH: process.env.PATH ?? '', DATABASE_URL: editorialUrl, PORT: '0', HOST: '127.0.0.1',
           IDENTITY_PUBLIC_KEYS: JSON.stringify({ fixture: key.publicKeyPem }), IDENTITY_ISSUER: 'iap',
           CONSENT_URL: consentBase, CONSENT_TOKEN_FILE: file, EDITORIAL_STANDALONE: 'consent', OBJECT_STORE_PATH: join(folder, 'objects'),
@@ -71,6 +74,25 @@ test('standalone Editorial uses real Consent HTTP and denies an old private draf
             blocks: [block('t', { basis: 'attributed_testimony', attribution: 'Fictional participant', sources: [subject] })] } });
           assert.equal(draft.status, 201, JSON.stringify(draft.json));
           assert.equal(draft.json.body.blocks[0].verification.useDecision.decision, 'allow');
+          // A factual/inference source is not testimony, but its permission withdrawal still applies.
+          const claimSubject = 'E07:claim:fictional-sourced-inference@1';
+          const claimPermission = await sendConsent('/v1/permissions', { holderId: holder.id, scope: { type: 'subject', value: claimSubject }, actions: ['adapt'],
+            purposes: ['editorial'], provenance: { method: 'other', note: 'Fictional declared-source grant; no truth assessment.' } });
+          const sourced = await send('POST', '/v1/documents', { body: { title: 'Fictional sourced inference', editorialProjectId: made.json.id, docType: 'article', language: 'en',
+            blocks: [block('i', { basis: 'inference', sources: [claimSubject] })] } });
+          assert.equal(sourced.status, 201, JSON.stringify(sourced.json));
+          const sourcedInput = { revision: 1, idempotencyKey: 'non-testimony-export' };
+          const sourcedExport = await send('POST', `/v1/documents/${sourced.json.id}/exports`, sourcedInput); assert.equal(sourcedExport.status, 201);
+          assert.deepEqual(sourcedExport.json.manifest.useDecisions[0].subjects, [claimSubject]);
+          assert.equal(sourcedExport.json.manifest.useDecisions[0].decision, 'allow');
+          await sendConsent(`/v1/permissions/${claimPermission.id}/withdraw`, { reason: 'Fictional non-testimony withdrawal' });
+          for (const input of [sourcedInput, { revision: 1 }]) {
+            const rejected = await send('POST', `/v1/documents/${sourced.json.id}/exports`, input);
+            assert.equal(rejected.status, 403); assert.equal(rejected.json.error.code, 'consent_denied');
+          }
+          const sourcedHistory = await send('GET', `/v1/documents/${sourced.json.id}/exports`);
+          assert.equal(sourcedHistory.json.length, 1); assert.equal(sourcedHistory.json[0].exportId, sourcedExport.json.manifest.exportId);
+          assert.equal((await send('GET', `/v1/documents/${sourced.json.id}`)).json.digest, sourced.json.digest);
           const exportInput = { revision: 1, idempotencyKey: 'private-export-before-withdrawal' };
           const originalExport = await send('POST', `/v1/documents/${draft.json.id}/exports`, exportInput); assert.equal(originalExport.status, 201);
           await sendConsent(`/v1/permissions/${permission.id}/withdraw`, { reason: 'Fictional withdrawal fixture' });
