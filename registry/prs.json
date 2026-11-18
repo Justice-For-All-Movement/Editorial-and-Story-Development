@@ -191,13 +191,12 @@
     },
     {
       "id": "current-factual-finding-http",
-      "status": "incomplete WIP; adapter exported but authoring/fact-check gap unresolved",
+      "status": "incomplete WIP; authoring/fact-check wiring implemented, actual PG/E08 qualification pending",
       "baseCommit": "ee944d9986a760b54ad1443bf5350c55f090f507",
       "documentation": "docs/FINDING_HTTP.md",
       "localEvidence": "5focused synthetic local groups, typecheck/build pass; no full suite/installed/PG/live claim",
       "remaining": [
-        "owning authoring and fact-check current-finding guard",
-        "actual pinned E08 integration",
+        "actual PostgreSQL owning finding-guard test and actual pinned E08 integration",
         "packed public exports/types/runtime and all final-head CI/source review",
         "host current-human/all-source rights/render/browserAT acceptance"
       ]

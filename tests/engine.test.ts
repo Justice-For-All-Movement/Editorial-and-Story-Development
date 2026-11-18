@@ -625,3 +625,23 @@ test('cached private export cannot bypass current document compartment visibilit
   await assert.rejects(e.exportDocument(ctx(), d.id, 1, options), fails('not_found'));
   const retained = await e.listExports(admitted, d.id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
 }));
+
+test('E08 findings cannot be empty-success verified facts and current metadata is retained in fact-check', needsPg, () => db(async sql => {
+  const ref = 'E08:finding:fiction@1';
+  const k = knowledge();
+  const unsupported = make(sql, { ports: { knowledge: k } });
+  await assert.rejects(doc(unsupported, [block('f', { sources: [ref] })]), fails('unavailable'));
+  let value: import('../src/engine/ports.ts').FindingStatus = { ref, state: 'approved', label: 'verified_fact', classification: 'established', stale: false, blocked: false };
+  const e = make(sql, { ports: { knowledge: k, findings: { async getFindingStatus(_ctx, selected) { assert.equal(selected, ref); return { ...value }; } } } });
+  const { id } = await doc(e, [block('f', { sources: [ref] })]);
+  let ledger = await e.factCheck(ctx(), id);
+  assert.equal(ledger.statements[0]!.status, 'supported');
+  assert.deepEqual(ledger.statements[0]!.sources[0]!.current, value);
+  for (const patch of [{ state: 'withdrawn' as const }, { stale: true }, { blocked: true }, { classification: 'disputed' as const }, { label: 'allegation' as const }]) {
+    const original = value; value = { ...value, ...patch };
+    await assert.rejects(doc(e, [block('f', { sources: [ref] })]), fails('invalid_basis'));
+    ledger = await e.factCheck(ctx(), id); assert.equal(ledger.statements[0]!.status, 'attention');
+    value = original;
+  }
+  assert.equal((await e.get(ctx(), 'document', id)).revision, 1, 'current finding checks never rewrite saved text');
+}));

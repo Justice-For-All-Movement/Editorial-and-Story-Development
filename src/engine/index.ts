@@ -20,7 +20,7 @@ import { analyzeLyrics as analyze, countSyllables, languageData, suggestRhymes a
 import type { LanguageSet, LyricAnalysis, RhymeSuggestion } from './lyrics.ts';
 import { EXPORT_FORMATS, collectDisclosures, defaultFormats, renderFountain, renderGraph, renderLyricSheet, renderMarkdown } from './render.ts';
 import type { ExportBlock, ExportDocument, ExportFormat } from './render.ts';
-import type { ClaimStatus, KnowledgePort, ModelPort } from './ports.ts';
+import type { ClaimStatus, KnowledgePort, ModelPort, FindingPort, FindingStatus } from './ports.ts';
 
 export * from './model.ts';
 export * from './ports.ts';
@@ -125,7 +125,7 @@ export type EditorialConfig = Readonly<{
   templates?: Readonly<Record<string, Templates>>;
   notices?: Readonly<Record<string, Readonly<{ satire?: string; campaign?: string; modelDisclosure?: string }>>>;
 }>;
-export type EditorialPorts = Readonly<{ knowledge?: KnowledgePort; useDecisions?: UseDecisionPort; authorization?: AuthorizationPort; model?: ModelPort }>;
+export type EditorialPorts = Readonly<{ knowledge?: KnowledgePort; findings?: FindingPort; useDecisions?: UseDecisionPort; authorization?: AuthorizationPort; model?: ModelPort }>;
 export type EditorialDeps = Readonly<{ sql: Sql; objects?: ObjectStore; ports?: EditorialPorts; config?: EditorialConfig }>;
 
 export type Flag = { id: string; objectId: string; blockId: string | null; kind: 'stale' | 'blocked'; reason: string; cause: string; ref: string; changeKind: string; status: 'open' | 'resolved'; revision: number; createdAt: string; resolvedAt: string | null; resolvedBy: string | null; resolution: string | null; note: string | null };
@@ -137,7 +137,7 @@ export type Comment = { id: string; objectId: string; revision: number; blockId:
 export type SuggestionProposal = { mode: 'replace' | 'insert'; blockId?: string; afterBlockId?: string; block: Block };
 export type Assignment = { id: string; objectId: string; blockId: string | null; assigneeId: string; role: string; note: string | null; dueAt: string | null; status: 'open' | 'done' | 'cancelled'; createdBy: string; createdAt: string; updatedAt: string };
 export type SaveOptions = { summary?: string; idempotencyKey?: string; unsupportedFacts?: 'reject' | 'downgrade'; downgradeTo?: Basis; resolveFlagIds?: readonly string[] };
-export type FactStatement = { blockId: string; ref: string; type: string; basis: Basis; text: string; attribution: string | null; uncertainty: string | null; status: 'supported' | 'not_checked' | 'sourced' | 'unsourced' | 'attention'; sources: { ref: string; selector: Json | null; role: 'fact' | 'testimony' | 'other'; current: ClaimStatus | 'unknown_claim' | 'not_checked' | null }[]; saved: Json | null; flags: Flag[] };
+export type FactStatement = { blockId: string; ref: string; type: string; basis: Basis; text: string; attribution: string | null; uncertainty: string | null; status: 'supported' | 'not_checked' | 'sourced' | 'unsourced' | 'attention'; sources: { ref: string; selector: Json | null; role: 'fact' | 'testimony' | 'other'; current: ClaimStatus | FindingStatus | 'unknown_finding' | 'unknown_claim' | 'not_checked' | null }[]; saved: Json | null; flags: Flag[] };
 export type FactCheck = { document: string; revision: number; knowledge: 'port' | 'standalone_not_checked'; summary: { blocks: number; byBasis: Record<string, number>; factual: number; unsourced: number; attention: number }; statements: FactStatement[]; unsourced: string[]; declared: { blockId: string; basis: Basis; disclosure: string | null; generatedRole: string | null }[] };
 export type ExportManifest = { exportId: string; engine: string; engineVersion: string; document: string; revision: number; contentDigest: string; reviewState: string; approval: { id: string; status: string; approverId: string; at: string } | null; formats: ExportFormat[]; renderingDigests: Record<string, string>; sourceRefs: string[]; assetRefs: string[]; viewpointRefs: string[]; packageRefs: string[]; translationOf: string | null; labels: ExportDocument['labels']; credits: ExportDocument['credits']; disclosures: ExportDocument['disclosures']; openFlags: { blockId: string | null; kind: string; reason: string; cause: string }[]; useDecisions: Json[]; intendedUse: UseAction; exportedAt: string; exportedBy: string; objectKey: string | null };
 export type ExportResult = { manifest: ExportManifest; document: ExportDocument; renderings: { markdown?: string; fountain?: string; lyricSheet?: string; graph?: Json } };
@@ -170,6 +170,7 @@ export function createEngine(deps: EditorialDeps) {
   const isFact = pattern(cfg.factSourcePatterns ?? ['E07:claim*', 'E08:finding*']);
   const isTestimony = pattern(cfg.testimonySourcePatterns ?? ['E02:*', 'E05:*', 'E06:*', 'E07:testimony*']);
   const supported = cfg.supportedFactualValues ?? ['supported'];
+  const findingOk = (v: FindingStatus | null): boolean => v !== null && v.state === 'approved' && v.label === 'verified_fact' && v.classification === 'established' && !v.stale && !v.blocked;
   const claimOk = (s: ClaimStatus | null): boolean => s !== null && supported.includes(s.factual) && !s.stale && !s.blocked;
   const notice = (lang: string, key: 'satire' | 'campaign' | 'modelDisclosure'): string => cfg.notices?.[lang]?.[key] ?? cfg.notices?.[lang.split('-')[0] as string]?.[key]
     ?? { satire: 'Satire. This work is not a factual report.', campaign: 'Campaign material published by {identity}.', modelDisclosure: 'Machine-proposed draft text. It is not sourced and has not been verified.' }[key];
@@ -303,6 +304,24 @@ export function createEngine(deps: EditorialDeps) {
       for (const p of panelsOf(b)) for (const ref of p.assetRefs) { const a = assets.get(ref); if (a === undefined) continue; if (a.blocked) throw new DomainError('consent_denied', `block ${b.id}: asset ${ref} is blocked`); invariant(a.approved, 'approval_invalid', `block ${b.id}: asset ${ref} has no active approval in the asset registry`); }
       const w = await isWithdrawn(tx, ctx, bl.map((l) => l.ref));
       if (w !== null) throw new DomainError('consent_denied', `block ${b.id}: permission for ${w} was withdrawn`);
+    }
+    // Findings use their own current metadata; E07 claim status cannot attest an E08 finding.
+    for (const b of changed.filter(x => x.basis === 'verified_fact')) {
+      const refs = b.sources.filter(ref => isFact(ref) && parseUref(ref).engine === 'E08');
+      if (refs.length === 0) continue;
+      invariant(ports.findings !== undefined, 'unavailable', 'A current Factual finding port is required for E08 verified_fact sources');
+      const results = [];
+      for (const ref of refs) results.push({ ref, status: await ports.findings.getFindingStatus(ctx, ref) });
+      const bad = results.filter(r => !findingOk(r.status));
+      if (bad.length > 0) {
+        if (o.unsupportedFacts !== 'downgrade') throw new DomainError('invalid_basis', `block ${b.id}: E08 finding metadata does not currently support this verified_fact label`);
+        const to = o.downgradeTo ?? 'allegation';
+        invariant(DOWNGRADE_TARGETS.includes(to), 'invalid_input', 'Invalid finding downgrade target');
+        b.basis = to;
+        b.downgraded = { from: 'verified_fact', reason: 'Current E08 finding metadata does not support this label' };
+        checkBasisRules(b, { projectKind, isFactSource: isFact, isTestimonySource: isTestimony });
+      }
+      b.verification = { ...(b.verification ?? {}), findings: { mode: 'port', status: bad.length ? 'downgraded' : 'accepted_metadata', records: results as unknown as Json }, checkedAt: ctx.now };
     }
     // verified_fact: factual assessment of every cited claim must be supported.
     const statusCache = new Map<string, ClaimStatus | null>();
@@ -775,6 +794,7 @@ export function createEngine(deps: EditorialDeps) {
       const l = await need(sql, ctx, 'document', documentId, revision === undefined ? {} : { revision });
       const flags = await openFlags(sql, ctx, documentId);
       const cache = new Map<string, ClaimStatus | null>();
+      const findings = new Map<string, FindingStatus | null>();
       const statements: FactStatement[] = []; const declared: FactCheck['declared'] = []; const byBasis: Record<string, number> = {};
       for (const b of l.r.body.blocks) {
         byBasis[b.basis] = (byBasis[b.basis] ?? 0) + 1;
@@ -784,17 +804,21 @@ export function createEngine(deps: EditorialDeps) {
           const claim = isFact(ref) && parseUref(ref).engine === 'E07';
           let current: FactStatement['sources'][number]['current'] = null;
           if (claim) { if (ports.knowledge === undefined) current = 'not_checked'; else { if (!cache.has(ref)) cache.set(ref, await ports.knowledge.getClaimStatus(ctx, ref)); current = cache.get(ref) ?? 'unknown_claim'; } }
+          if (isFact(ref) && parseUref(ref).engine === 'E08') {
+            if (ports.findings === undefined) current = 'not_checked';
+            else { if (!findings.has(ref)) findings.set(ref, await ports.findings.getFindingStatus(ctx, ref)); current = findings.get(ref) ?? 'unknown_finding'; }
+          }
           sources.push({ ref, selector: b.sourceSelectors?.[ref] ?? null, role: isFact(ref) ? 'fact' : isTestimony(ref) ? 'testimony' : 'other', current });
         }
         const mine = flags.filter((f) => f.blockId === b.id);
         const claims = sources.filter((s) => s.current !== null);
         const status: FactStatement['status'] = mine.length > 0 ? 'attention'
-          : b.basis === 'verified_fact' ? (claims.some((s) => s.current === 'unknown_claim' || (typeof s.current === 'object' && s.current !== null && !claimOk(s.current))) ? 'attention' : ports.knowledge === undefined || claims.length === 0 ? 'not_checked' : 'supported')
+          : b.basis === 'verified_fact' ? (claims.some((s) => s.current === 'unknown_claim' || s.current === 'unknown_finding' || (typeof s.current === 'object' && s.current !== null && !('classification' in s.current ? findingOk(s.current) : claimOk(s.current)))) ? 'attention' : claims.length === 0 || claims.some(s => s.current === 'not_checked') ? 'not_checked' : 'supported')
           : b.sources.length === 0 ? 'unsourced' : 'sourced';
         statements.push({ blockId: b.id, ref: blockRef(documentId, b.id, l.r.revision), type: b.type, basis: b.basis, text: b.text, attribution: b.attribution ?? null, uncertainty: b.note ?? null, status, sources, saved: (b.verification ?? null) as Json | null, flags: mine });
       }
       const unsourced = statements.filter((s) => s.status === 'unsourced').map((s) => s.blockId);
-      return { document: uref(EID, 'document', documentId, l.r.revision), revision: l.r.revision, knowledge: ports.knowledge === undefined ? 'standalone_not_checked' : 'port',
+      return { document: uref(EID, 'document', documentId, l.r.revision), revision: l.r.revision, knowledge: ports.knowledge === undefined && ports.findings === undefined ? 'standalone_not_checked' : 'port',
         summary: { blocks: l.r.body.blocks.length, byBasis, factual: statements.filter((s) => FACTUAL_BASES.includes(s.basis)).length, unsourced: unsourced.length, attention: statements.filter((s) => s.status === 'attention').length }, statements, unsourced, declared };
     },
 

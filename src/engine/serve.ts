@@ -9,7 +9,7 @@
 import { readFile } from 'node:fs/promises';
 import pg from 'pg';
 import { createHttpHandler, createTokenVerifier, objectStoreFromEnv, pgSql, serve } from '../service-kit.ts';
-import { createEngine, httpKnowledgePort, httpModelPort, httpUseDecisionPort, manifest, migrate, routes } from './index.ts';
+import { createEngine, httpFindingPort, httpKnowledgePort, httpModelPort, httpUseDecisionPort, manifest, migrate, routes } from './index.ts';
 import type { EditorialConfig } from './index.ts';
 
 async function main(): Promise<void> {
@@ -22,6 +22,7 @@ async function main(): Promise<void> {
   const fileConfig = env.EDITORIAL_CONFIG_FILE ? JSON.parse(await readFile(env.EDITORIAL_CONFIG_FILE, 'utf8')) as EditorialConfig : {};
   const standalone = (env.EDITORIAL_STANDALONE ?? '').split(',').map((s) => s.trim());
   const knowledgeToken = await secret(env.KNOWLEDGE_TOKEN_FILE), modelKey = await secret(env.MODEL_API_KEY_FILE), consentToken = await secret(env.CONSENT_TOKEN_FILE);
+  const findingToken = await secret(env.FACTUAL_TOKEN_FILE);
   const pool = new pg.Pool({ connectionString: env.DATABASE_URL, max: 10 });
   const sql = pgSql(pool);
   await migrate(sql);
@@ -29,6 +30,7 @@ async function main(): Promise<void> {
     sql,
     ...(env.OBJECT_STORE !== undefined || env.OBJECT_STORE_PATH !== undefined ? { objects: objectStoreFromEnv(env, './data/objects') } : {}),
     ports: {
+      ...(env.FACTUAL_URL ? { findings: httpFindingPort({ baseUrl: env.FACTUAL_URL, ...(findingToken === undefined ? {} : { token: findingToken }) }) } : {}),
       ...(env.CONSENT_URL ? { useDecisions: httpUseDecisionPort({ baseUrl: env.CONSENT_URL, ...(consentToken === undefined ? {} : { token: consentToken }) }) } : {}),
       ...(env.KNOWLEDGE_URL ? { knowledge: httpKnowledgePort({ baseUrl: env.KNOWLEDGE_URL, ...(knowledgeToken === undefined ? {} : { token: knowledgeToken }) }) } : {}),
       ...(env.MODEL_ENDPOINT ? { model: httpModelPort({ endpoint: env.MODEL_ENDPOINT, ...(modelKey === undefined ? {} : { apiKey: modelKey }) }) } : {}),
