@@ -877,9 +877,26 @@ export function createEngine(deps: EditorialDeps) {
         capabilities: Object.freeze([...ctx.capabilities]), compartments: Object.freeze([...ctx.compartments]) });
       options = Object.freeze({ ...options, ...(options.formats === undefined ? {} : { formats: Object.freeze([...options.formats]) }) });
       requireCapability(ctx, 'editorial:export');
-      if (ports.authorization !== undefined) { const a = await ports.authorization.authorize(ctx, { capability: 'editorial:export', resource: uref(EID, 'document', UUID.test(documentId) ? documentId : 'unknown') }); if (!a.allowed) throw new DomainError('forbidden', 'Export is not authorized'); }
+      // Select the optional host authority once; a callback cannot remove it to skip this request's final check.
+      // Decisions are fresh at each check, and a post-COMMIT denial withholds disclosure without undoing history.
+      const resource = uref(EID, 'document', UUID.test(documentId) ? documentId : 'unknown');
+      let authorize: () => Promise<void> = async () => {};
+      try {
+        const port = ports.authorization;
+        if (port !== undefined) {
+          const method = port.authorize;
+          invariant(typeof method === 'function', 'forbidden', 'Export is not authorized');
+          authorize = async () => {
+            let allowed = false;
+            try { allowed = (await method.call(port, ctx, { capability: 'editorial:export', resource })).allowed === true; }
+            catch { /* Host errors and decision getters must not disclose private diagnostics. */ }
+            invariant(allowed, 'forbidden', 'Export is not authorized');
+          };
+        }
+      } catch { throw new DomainError('forbidden', 'Export is not authorized'); }
+      await authorize();
       const { idempotencyKey, ...rest } = options;
-      return sql.tx(async (tx) => {
+      const result = await sql.tx(async (tx) => {
         // Replays disclose private content too: current authority must precede the cache.
         const l = await need(tx, ctx, 'document', documentId, { revision: posInt(revision, 'revision') });
         const body = l.r.body;
@@ -944,6 +961,10 @@ export function createEngine(deps: EditorialDeps) {
           return result;
         });
       });
+      // Includes cached acknowledgements and waits for the actual SQL outcome before this final admission.
+      // A committed export remains retained even when no content can be returned to this caller.
+      await authorize();
+      return result;
     },
     async listExports(ctx: ServiceContext, documentId: string): Promise<ExportManifest[]> {
       requireCapability(ctx, 'editorial:read');

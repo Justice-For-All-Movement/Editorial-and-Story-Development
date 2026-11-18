@@ -103,6 +103,10 @@ jobs:
           persist-credentials: false
       - run: npm ci
         working-directory: .engines/consent
+      - name: Source private export authority regressions
+        run: node --test tests/export-authority.test.ts
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
       - run: npm run test:consent
         env:
           E11_DIR: ${{ github.workspace }}/.engines/consent
@@ -120,6 +124,12 @@ jobs:
         run: npm run test:consent
         env:
           E11_DIR: ${{ github.workspace }}/.engines/consent
+          TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
+          EDITORIAL_PACKAGE_ROOT: ${{ runner.temp }}/editorial-export-consumer
+
+      - name: Run private export authority regressions through installed public engine
+        run: node --test tests/export-authority.test.ts
+        env:
           TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
           EDITORIAL_PACKAGE_ROOT: ${{ runner.temp }}/editorial-export-consumer
 
