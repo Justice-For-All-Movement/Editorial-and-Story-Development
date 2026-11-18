@@ -573,12 +573,18 @@ export function createEngine(deps: EditorialDeps) {
 
   async function exportView(q: Sql, ctx: ServiceContext, l: Loaded): Promise<{ doc: ExportDocument; project: Loaded; viewpoints: Map<string, ViewpointBody> }> {
     const body = l.r.body as DocumentBody;
-    const project = await load(q, ctx, 'editorial_project', body.editorialProjectId, { system: true }) ?? notFound();
+    const project = await need(q, ctx, 'editorial_project', body.editorialProjectId);
     const pb = project.r.body as ProjectBody;
     const credits: ExportDocument['credits'] = [];
-    for (const c of pb.credits) { const col = await load(q, ctx, 'collaborator', c.collaboratorId, { system: true }); if (col !== null) credits.push({ name: (col.r.body as CollaboratorBody).name, role: c.role, creditLine: c.creditLine ?? (col.r.body as CollaboratorBody).creditLine }); }
+    for (const c of pb.credits) {
+      const col = await need(q, ctx, 'collaborator', c.collaboratorId);
+      credits.push({ name: col.r.body.name, role: c.role, creditLine: c.creditLine ?? col.r.body.creditLine });
+    }
     const viewpoints = new Map<string, ViewpointBody>();
-    for (const id of new Set(body.blocks.map((b) => b.viewpointId).filter((x): x is string => x !== undefined))) { const v = await load(q, ctx, 'viewpoint', id, { system: true }); if (v !== null) viewpoints.set(id, v.r.body as ViewpointBody); }
+    for (const id of new Set(body.blocks.map((b) => b.viewpointId).filter((x): x is string => x !== undefined))) {
+      const v = await need(q, ctx, 'viewpoint', id);
+      viewpoints.set(id, v.r.body);
+    }
     const blocks: ExportBlock[] = body.blocks.map((b) => { const v = b.viewpointId === undefined ? undefined : viewpoints.get(b.viewpointId); return v === undefined ? b : { ...b, viewpoint: { id: b.viewpointId as string, label: v.label, attribution: v.attribution } }; });
     const n = pb.projectKind === 'satire' ? notice(body.language, 'satire') : pb.projectKind === 'campaign' ? notice(body.language, 'campaign').replace('{identity}', pb.publishingIdentity) : null;
     return { project, viewpoints, doc: {
@@ -910,8 +916,9 @@ export function createEngine(deps: EditorialDeps) {
         const approvalRow = (await tx.query(`select * from ${S}.approvals where tenant_id=$1 and project_id=$2 and object_id=$3 and revision=$4 order by at desc limit 1`, [...scope(ctx), documentId, l.r.revision]))[0];
         const approval = approvalRow === undefined ? null : toApproval(approvalRow, 'document');
         if (options.requireApproved === true) invariant(approval !== null && approval.status === 'active' && approval.digest === l.r.digest, 'approval_invalid', approval === null ? `Revision ${l.r.revision} has no approval` : `The approval of revision ${l.r.revision} is ${approval.status}`);
-        await currentExportFacts(ctx, body.blocks);
+        // Own dependency visibility must pass before current external source callbacks and cached disclosure.
         const view = await exportView(tx, ctx, l);
+        await currentExportFacts(ctx, body.blocks);
         const intendedUse: UseAction = options.intendedUse === 'publish' ? 'publish' : 'adapt';
         // Every recorded external dependency matters, whatever the block's editorial basis label.
         // Keep saved obligations as well as currently loaded viewpoint dependencies; never truncate.

@@ -1,0 +1,9 @@
+{
+  "sha256": {
+    "src/engine/index.ts": "197e9352c79f441009a56fefc41575d0803afcbc58c21f882712059337a11ead",
+    "tests/export-dependency-visibility.test.ts": "d66a9acbab3a0d56b2b2b179dabaee9da4e4a3ebb3b192910624df1a233fef67",
+    ".github/workflows/ci.yml": "131db05d9b97361f3bae6d3ad8127a5e443612645f886341611c1407e680b0ea",
+    "docs/EXPORT_DEPENDENCY_VISIBILITY.md": "059dcf63f55fedb00d6ca3fb4dcab64ad167e63542062618b8f1c6e7f2abb170",
+    "docs/ENGINE_API.md": "63ec702865369d9d19234f3bdbc120634fbfe13c7694e24125b75267e33f361a"
+  }
+}
