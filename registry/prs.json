@@ -410,13 +410,12 @@
     },
     {
       "id": "export-dependency-visibility",
-      "status": "reviewed qualified runtime; final documentation-head CI/rules/expected-head merge pending",
+      "status": "accepted PR7; earlier candidate notes historical",
       "baseCommit": "9fe2e1d2db486e36caef52970af49483cd7bb181",
       "regressionCommit": "3d72b676e14b9e7777c578d35005adc8a6bb5035",
       "documentation": "docs/EXPORT_DEPENDENCY_VISIBILITY.md",
       "verification": "docs/export-dependency-visibility-verification.json",
       "remaining": [
-        "final documentation-head current checks/rules/expected-head merge",
         "post-storage whole-source/own visibility/recursive E09/current-human/rights/lifecycle qualification"
       ],
       "limits": "current own metadata visibility only; no system read/drop fallback; synthetic use decisions not authentication/complete rights; retain history/unknown objects, no cleanup/distributed fence",
@@ -443,7 +442,40 @@
         "failures": 0,
         "cancelled": 0,
         "skips": 0
+      },
+      "sourceCommit": "54e021c912c8b8cfc901bcbe25102ed09edac110",
+      "mergeCommit": "4387e05b7a33305509fba962ac7aae83c1635413",
+      "finalCi": {
+        "ordinaryJob": 135020983271,
+        "ordinaryTests": 57,
+        "consentAndAuthorityJob": 135020983670,
+        "focusedSourceTests": 7,
+        "focusedFreshInstalledPublicEngineTests": 7,
+        "actualE11SourceTests": 1,
+        "actualE11FreshInstalledPublicServeTests": 1,
+        "knowledgeJob": 135020983722,
+        "factualJob": 135020983736,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
       }
+    },
+    {
+      "id": "export-final-visibility",
+      "status": "explicitly incomplete test-only WIP; no runtime implementation; actual baseline CI pending",
+      "baseCommit": "4387e05b7a33305509fba962ac7aae83c1635413",
+      "regressionCommit": "655c669d7c7d89a80b9d6127affe4b2e350d65d6",
+      "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/8",
+      "documentation": "docs/EXPORT_FINAL_VISIBILITY.md",
+      "local": "typecheck passed on prepared dependencies; no local PG/full or installed result",
+      "remaining": [
+        "inspect actual four-case post-storage owning-PG baseline",
+        "implement coherent NEW and CACHED final own-visibility/complete-original-basis checks without replacing original private dependencies",
+        "preserve committed history/unknown outcomes and original replay ACK; no deletion/automatic retry",
+        "meaningful source/installed/upstream tests and review/current-head checks/rules/expected merge"
+      ],
+      "limits": "direct SQL compartment update is only an owning test fixture, not a host/admin API; no current human/complete rights/distributed-fence/SQL-filesystem atomicity claim"
     }
   ],
   "approvedDesignSha256": {
