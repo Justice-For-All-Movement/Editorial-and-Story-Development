@@ -48,7 +48,7 @@ for (const kind of ['document', 'editorial_project', 'collaborator', 'viewpoint'
 
 test('cached export retains removed historical contributor visibility obligations', needsPg, () => withDisposableDatabase(pg, ADMIN, async (_url, sql) => {
   await migrate(sql); const e = createEngine({ sql });
-  const col = await e.create(ctx(), 'collaborator', { body: { name: 'Original fictional contributor', roles: ['writer'] } });
+  const col = await e.create(ctx(), 'collaborator', { body: { name: 'Original fictional contributor', roles: ['writer'], creditLine: 'Original fictional credit' } });
   const p = await e.create(ctx(), 'editorial_project', { body: project({ credits: [{ collaboratorId: col.id, role: 'writer' }] }) });
   const d = await e.create(ctx(), 'document', { body: { title: 'Private draft', editorialProjectId: p.id, docType: 'article', language: 'en',
     blocks: [block('u', { basis: 'unknown_acknowledged', sources: [] })] } });
