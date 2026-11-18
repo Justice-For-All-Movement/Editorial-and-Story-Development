@@ -205,7 +205,7 @@ test('approval binds to one revision; a source change invalidates it without rew
 }));
 
 test('generators keep the labels and sources of the investigation package', needsPg, () => db(async (sql) => {
-  const k = knowledge(); const e = make(sql, { ports: { knowledge: k, useDecisions: useDecisions() } });
+  const k = knowledge(); const e = make(sql, { ports: { knowledge: k, findings: { async getFindingStatus(_ctx, ref) { assert.equal(ref, FINDING_CONTRACT); return { ref, state: 'approved', label: 'verified_fact', classification: 'established', stale: false, blocked: false }; } }, useDecisions: useDecisions() } });
   const p = await e.create(ctx(), 'editorial_project', { body: project() });
   const v = await e.create(ctx(), 'viewpoint', { body: viewpoint() });
   const gen = (generator: string, extra: Record<string, unknown> = {}) => e.generate(ctx(), { generator: generator as 'outline', editorialProjectId: p.id, package: investigationPackage(), viewpointIds: [v.id], ...extra });
