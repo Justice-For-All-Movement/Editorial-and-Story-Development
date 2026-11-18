@@ -67,17 +67,27 @@
   "checkpoints": [
     {
       "id": "real-knowledge-http",
-      "status": "incomplete WIP; real-engine integration/package/final-head CI pending",
+      "status": "incomplete WIP; all final-head CI required",
       "baseCommit": "0639821bcd2efd4a6c0c3d6bc8961cbd3579d4f6",
       "documentation": "docs/KNOWLEDGE_HTTP.md",
-      "localEvidence": "Five focused synthetic transport groups pass; typecheck/build separate",
+      "localEvidence": "6 focused+6 packed public-export+4 preserved lyric/HTTP groups, typecheck/build/registry/declarations/3runtime bytes match; zero failures/skips; copied prepared consumer dependencies, not fresh install/full local suite",
       "remaining": [
         "actual pinned E07 HTTP integration",
         "final-head CI/package qualification",
         "E08 finding status and all-source Consent/current authority integration",
         "host/deployed/browser/AT/creative quality acceptance"
       ],
-      "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/1"
+      "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/1",
+      "initialCiEvidence": {
+        "source": "5422451d62c357bdd824b76498ccfe4cd70dc166",
+        "realE07Job": 134722333076,
+        "realE07Tests": 1,
+        "failures": 0,
+        "skips": 0,
+        "ordinary": "25pass/1failure: obsolete invented-route test fixture; corrected locally; no weakened assertions"
+      },
+      "verification": "docs/knowledge-http-verification.json",
+      "sourceReview": "clear for conservative exact scoped metadata boundary"
     }
   ],
   "approvedDesignSha256": {

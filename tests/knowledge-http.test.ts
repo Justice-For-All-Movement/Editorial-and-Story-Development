@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import { DomainError } from '../src/contracts.ts';
 import { httpKnowledgePort } from '../src/engine/ports.ts';
 import { ctx } from './fixtures.ts';
-const token = (tid = 't1', pid = 'p1', purpose = 'editorial') => `header.${Buffer.from(JSON.stringify({ tid, pid, purpose })).toString('base64url')}.signature`;
+const token = (tid = 't1', pid = 'p1', purpose = 'editorial', cmp: string[] = []) => `header.${Buffer.from(JSON.stringify({ tid, pid, purpose, cmp, kind: 'service' })).toString('base64url')}.signature`;
 const ref = 'E07:claim:example@2';
-const claim = (extra = {}) => ({ ref, id: 'example', kind: 'claim', revision: 2, state: 'active', stale: false, blocked: false,
+const claim = (extra = {}) => ({ ref, id: 'example', kind: 'claim', revision: 2, state: 'active', compartment: null, stale: false, blocked: false,
   assessments: { factual: { value: 'supported', needsReverification: false }, editorial: { value: 'not_reviewed', needsReverification: false } }, ...extra });
 const unavailable = (e: unknown) => e instanceof DomainError && e.code === 'unavailable';
 test('actual E07 GET claim route and assessment tracks, with one scope-checked credential', async () => {
@@ -18,7 +18,7 @@ test('actual E07 GET claim route and assessment tracks, with one scope-checked c
 });
 test('tenant/project/purpose mismatch and malformed exact refs never reach transport', async () => {
   let sends = 0;
-  for (const credential of [undefined, token('foreign'), token('t1', 'foreign'), token('t1', 'p1', 'other')]) {
+  for (const credential of [undefined, token('foreign'), token('t1', 'foreign'), token('t1', 'p1', 'other'), token('t1', 'p1', 'editorial', ['vault'])]) {
     const port = httpKnowledgePort({ baseUrl: 'https://example.invalid', ...(credential === undefined ? {} : { token: credential }),
       fetch: async () => { sends++; return Response.json(claim()); } });
     await assert.rejects(port.getClaimStatus(ctx(), ref), unavailable);
@@ -29,7 +29,7 @@ test('tenant/project/purpose mismatch and malformed exact refs never reach trans
 });
 test('old convention and malformed or different editions cannot silently become supported', async () => {
   for (const value of [{ factual: 'supported', editorial: 'approved' }, claim({ ref: 'E07:claim:example@3', revision: 3 }),
-    claim({ assessments: { factual: { value: 'supported' }, editorial: { value: 'approved' } } }), claim({ stale: undefined })]) {
+    claim({ assessments: { factual: { value: 'supported' }, editorial: { value: 'approved' } } }), claim({ stale: undefined }), claim({ compartment: 'vault' })]) {
     await assert.rejects(httpKnowledgePort({ baseUrl: 'https://example.invalid', token: token(), fetch: async () => Response.json(value) }).getClaimStatus(ctx(), ref), unavailable);
   }
   for (const status of [401, 403, 500]) await assert.rejects(httpKnowledgePort({ baseUrl: 'https://example.invalid', token: token(), fetch: async () => Response.json({}, { status }) }).getClaimStatus(ctx(), ref), unavailable);
@@ -49,4 +49,13 @@ test('oversize responses, malformed UTF8 and late callbacks fail closed and clos
         return mode === 'utf8' ? new Response(new Uint8Array([255])) : new Response(JSON.stringify(claim()) + (mode === 'bytes' ? ' '.repeat(512 * 1024) : '')); } });
     await assert.rejects(port.getClaimStatus(ctx(), ref), unavailable); assert.equal((signal as AbortSignal | null)?.aborted, true);
   }
+});
+
+test('compartment grants are bounded by the caller snapshot even when a credential callback mutates the original context', async () => {
+  const compartments: string[] = []; const caller = ctx({ compartments }); let sends = 0;
+  const port = httpKnowledgePort({ baseUrl: 'https://example.invalid', token: () => { compartments.push('vault'); return token('t1', 'p1', 'editorial', ['vault']); },
+    fetch: async () => { sends++; return Response.json(claim({ compartment: 'vault' })); } });
+  await assert.rejects(port.getClaimStatus(caller, ref), unavailable); assert.equal(sends, 0);
+  const allowed = httpKnowledgePort({ baseUrl: 'https://example.invalid', token: token('t1', 'p1', 'editorial', ['vault']), fetch: async () => Response.json(claim({ compartment: 'vault' })) });
+  assert.equal((await allowed.getClaimStatus(ctx({ compartments: ['vault'] }), ref))?.factual, 'supported');
 });

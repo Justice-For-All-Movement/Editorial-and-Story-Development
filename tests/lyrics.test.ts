@@ -48,7 +48,7 @@ test('HTTP port adapters against a controlled local server: success, 404, provid
     seen.push({ url: req.url ?? '', auth: req.headers.authorization, body });
     if (req.url === '/model') { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify({ model: 'local-fixture', proposals: [{ text: 'A line.' }] })); }
     else if (req.url === '/broken') { res.statusCode = 500; res.end('secret-internal-detail'); }
-    else if (req.url === '/v1/claims/status') { const ref = (JSON.parse(body) as { ref: string }).ref; if (ref.includes('missing')) { res.statusCode = 404; res.end(); } else { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify({ factual: 'contested', editorial: 'approved', stale: true })); } }
+    else if (req.method === 'GET' && req.url?.startsWith('/v1/claims/')) { const id = req.url.slice('/v1/claims/'.length); if (id === 'missing') { res.statusCode = 404; res.end(); } else { res.setHeader('content-type', 'application/json'); res.end(JSON.stringify({ ref: `E07:claim:${id}@1`, id, kind: 'claim', revision: 1, state: 'active', compartment: null, stale: true, blocked: false, assessments: { factual: { value: 'contested', needsReverification: false }, editorial: { value: 'approved', needsReverification: false } } })); } }
     else { res.statusCode = 404; res.end(); }
   }); });
   await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
@@ -60,9 +60,11 @@ test('HTTP port adapters against a controlled local server: success, 404, provid
     await assert.rejects(httpModelPort({ endpoint: `${base}/broken`, apiKey: 'key-123' }).propose(ctx(), request), (e: unknown) => e instanceof DomainError && e.code === 'unavailable' && !/secret|key-123/.test(e.message));
     await assert.rejects(httpModelPort({ endpoint: 'http://127.0.0.1:1/none', timeoutMs: 2000 }).propose(ctx(), request), (e: unknown) => e instanceof DomainError && e.code === 'unavailable');
     assert.throws(() => httpModelPort({ endpoint: 'file:///etc/passwd' }), (e: unknown) => e instanceof DomainError && e.code === 'invalid_config');
-    const k = httpKnowledgePort({ baseUrl: base, token: 'svc-token' });
+    const credential = `header.${Buffer.from(JSON.stringify({ tid: 't1', pid: 'p1', purpose: 'editorial', kind: 'service', cmp: [] })).toString('base64url')}.signature`;
+    const k = httpKnowledgePort({ baseUrl: base, token: credential });
     assert.deepEqual(await k.getClaimStatus(ctx(), 'E07:claim:c1@1'), { factual: 'contested', editorial: 'approved', stale: true, blocked: false });
-    assert.equal(await k.getClaimStatus(ctx(), 'E07:claim:missing'), null);
-    assert.equal(seen.at(-1)!.auth, 'Bearer svc-token');
+    assert.equal(await k.getClaimStatus(ctx(), 'E07:claim:missing@1'), null);
+    assert.equal(seen.at(-1)!.auth, `Bearer ${credential}`);
+    assert.equal(seen.at(-1)!.body, '');
   } finally { server.close(); }
 });

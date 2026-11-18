@@ -261,9 +261,9 @@ end through the real `serve` entry in a child process.
 
 Not implemented or not verified:
 
-- `httpKnowledgePort` and `httpModelPort` are generic adapters with their own small JSON contracts (see `ports.ts`).
-  They are tested against a controlled local server only: **implemented, not verified against a live E07 or a live model provider**.
-- Integration with the real E07, E08, E10, E11 and E12 engines has not been run from this repository; the package
+- `httpKnowledgePort` reads the actual E07 `GET /v1/claims/:id` dossier at the exact cited edition. It requires a service token bound to tenant/project/purpose, with compartments no broader than the caller snapshot. It maps the current assessment tracks and stale/blocked/withdrawal metadata; see `KNOWLEDGE_HTTP.md` for boundaries and current test evidence. The dedicated pinned-real-E07 CI job is required for acceptance. No live deployed E07 is qualified.
+- `httpModelPort` retains its generic JSON contract and is not verified against a live model provider.
+- A dedicated E07 HTTP integration test is now present; its actual CI result is recorded in `KNOWLEDGE_HTTP.md`. Integration with E08, E10, E11 and E12 remains unqualified; the package
   fixture copies E08's shape by hand.
 - Lyrics: syllables and rhymes come from spelling rules, not a pronouncing dictionary. Irregular words can be miscounted,
   stress and true metrical feet are not analysed, and rhyme candidates must be supplied (caller, document text or lexicon).

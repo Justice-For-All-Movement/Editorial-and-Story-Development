@@ -9,7 +9,9 @@ function checkScope(ctx: ServiceContext, token: string | undefined, _engine: str
   const payload = token.split('.')[1];
   invariant(payload !== undefined && /^[A-Za-z0-9_-]+$/.test(payload), 'unavailable', 'Invalid Knowledge credential');
   const claims: unknown = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(Buffer.from(payload, 'base64url')));
-  invariant(object(claims) && claims.tid === ctx.tenantId && claims.pid === ctx.projectId && claims.purpose === ctx.purpose,
+  invariant(object(claims) && claims.tid === ctx.tenantId && claims.pid === ctx.projectId && claims.purpose === ctx.purpose
+    && claims.kind === 'service' && Array.isArray(claims.cmp) && claims.cmp.length <= 256
+    && claims.cmp.every((c: unknown) => typeof c === 'string' && ctx.compartments.includes(c)),
     'unavailable', 'Knowledge credential scope or purpose differs');
 }
 const MAX_RESPONSE_BYTES = 512 * 1024;
@@ -118,14 +120,15 @@ export function httpKnowledgePort(options: KnowledgeHttpOptions): KnowledgePort 
       const selected = /^E07:claim:([A-Za-z0-9][A-Za-z0-9._-]{0,127})@([1-9][0-9]{0,15})$/.exec(ref);
       invariant(selected !== null && Number.isSafeInteger(Number(selected[2])), 'unavailable', 'An exact E07 claim edition is required');
       // Capture the caller scope before any injected credential/transport callback.
-      const scope = { ...ctx, tenantId: ctx.tenantId, projectId: ctx.projectId, purpose: ctx.purpose };
+      const scope = { ...ctx, tenantId: ctx.tenantId, projectId: ctx.projectId, purpose: ctx.purpose, compartments: [...ctx.compartments] };
       const result = await call(configured, scope, 'knowledge', 'GET', `/v1/claims/${encodeURIComponent(selected[1]!)}`);
       if (result.status === 404) return null;
       invariant(result.status === 200, 'unavailable', 'Knowledge claim read failed');
       const value = result.json;
       invariant(object(value) && value.ref === ref && value.kind === 'claim' && value.id === selected[1]
         && value.revision === Number(selected[2]) && typeof value.stale === 'boolean' && typeof value.blocked === 'boolean'
-        && ['active', 'withdrawn', 'superseded'].includes(value.state as string) && object(value.assessments),
+        && ['active', 'withdrawn', 'superseded'].includes(value.state as string) && object(value.assessments)
+        && (value.compartment === null || (typeof value.compartment === 'string' && scope.compartments.includes(value.compartment))),
         'unavailable', 'Knowledge returned a different edition or malformed claim');
       const factual = value.assessments.factual, editorial = value.assessments.editorial;
       invariant(object(factual) && FACTUAL.includes(factual.value as string) && typeof factual.needsReverification === 'boolean'

@@ -1,0 +1,46 @@
+{
+  "status": "incomplete WIP; all final-head CI required",
+  "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/1",
+  "baseCommit": "0639821bcd2efd4a6c0c3d6bc8961cbd3579d4f6",
+  "target": "existing default feature/pam-completion; no main branch created",
+  "peerPin": "Justice-For-All-Movement/Knowledge-and-verification-engine@5e0912888f3a8eaa169e92215ee9bb7d4addcf84",
+  "local": {
+    "focused": 6,
+    "packedPublicExports": 6,
+    "preservedLyricHttp": 4,
+    "failures": 0,
+    "skips": 0,
+    "typecheck": true,
+    "build": true,
+    "registry": true,
+    "strictDeclarations": true,
+    "runtimeBytes": [
+      "dist/engine/knowledge-http.js",
+      "dist/engine/ports.js",
+      "dist/engine/index.js"
+    ]
+  },
+  "initialCi": {
+    "source": "5422451d62c357bdd824b76498ccfe4cd70dc166",
+    "realPeerJob": 134722333076,
+    "realPeerTests": 1,
+    "failures": 0,
+    "skips": 0,
+    "ordinary": "25pass/1obsolete invented-route fixture failure; corrected without dropping model/failure/secret assertions; fresh final head required"
+  },
+  "review": "Clear for exact current claim status mapping and conservative stale/withdrawal gates, fixed tenant/project/purpose and compartment subset, one captured service credential, bounded UTF8/copies/monotonic read/owned signal cleanup. Vendored kit/contracts and dependencies unchanged; no new SQL or foreign database reads.",
+  "limits": [
+    "decoded JWT claims are not authentication; receiving E07 verifies signatures",
+    "service credential is not original-human delegation; no source/Consent/use permission proof",
+    "no full local suite/local PostgreSQL/fresh dependency installation/deployed TLS/browser/AT acceptance",
+    "no new model/provider/research/send/publication/payment/paid/PAM operation"
+  ],
+  "sha256": {
+    "src/engine/knowledge-http.ts": "5e5f9ec2058feb3be09f253e4776816bdda2f829d1d2a631411f6ddc171e5ee1",
+    "src/engine/ports.ts": "37b1dac95791e2fec3f60c90b3bd1a98003557a0e195be394d2b034811565f38",
+    "tests/knowledge-http.test.ts": "2891fe90f84f3dfa973df4ab6d8d986dff1f275c5d55a6a92d7a8e8450a5fd79",
+    "tests/lyrics.test.ts": "a527ee2f3287735505be3388cc4c2cc2e03addefb3397a57629ecf43468e03c7",
+    "integration/knowledge-http.test.ts": "44267d7759c94289399cefea76b29025f2256a4f98768d1c0d9d74dddc6fd6bc",
+    "docs/KNOWLEDGE_HTTP.md": "0e0f59289e29e65846ef8c78552516a2cfa3d02417a47fe6a1aa4fc60c968ad9"
+  }
+}
