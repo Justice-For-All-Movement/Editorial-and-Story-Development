@@ -1,0 +1,27 @@
+{
+  "status": "implemented candidate; final runtime/peer/installed/source/current-head acceptance pending",
+  "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/4",
+  "base": "1f98aa10fcab61b01e3015fb94a026609c4926f2",
+  "reproduction": {
+    "source": "7b241d12bd8fe12163212a38e97e033e7ac9bae1",
+    "ordinaryJob": 134864591633,
+    "tests": 42,
+    "passes": 40,
+    "expectedFailures": 2,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "localEvidence": "typecheck/build/original-registry pass; copied prepared dependencies, no local PG/full suite/installed claim",
+  "limits": [
+    "candidate real PG/real E11/unchanged peer/final-head CI qualification",
+    "public installed runtime/source review/rules/expected-head merge",
+    "current-source status/final post-render permission checks and host-human/complete rights/lifecycle acceptance"
+  ],
+  "sha256": {
+    "src/engine/index.ts": "3d9561d0121e03e0312fd9668d5b0e05b61021449dfd734b69a9bfc25f119d95",
+    "tests/engine.test.ts": "ce1b41169e8e1ed2647fe760f4aa5ec1cca235eaa3e1d58cd8e7c135e2b4d2c0",
+    "integration/consent-http.test.ts": "5e5cb4435146de0589c389c2c2e9dd2c23955628838662b29ccccb52df1abfc4",
+    "docs/EXPORT_SOURCE_PERMISSIONS.md": "e082ba1a45bba52822db478dbf0ed618ff726f214834ec2714e7fffb83b79bda",
+    "docs/ENGINE_API.md": "c72d15d6dcd7eedc2b0433fa8e768a7412908db8468910c8b3d5302c553d1217"
+  }
+}

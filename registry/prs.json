@@ -228,15 +228,25 @@
     },
     {
       "id": "export-all-declared-source-permissions",
-      "status": "incomplete regression WIP; no runtime change yet",
+      "status": "implemented candidate; actual baseline 40pass/2fail reproduced; final runtime/peer/package/CI/review pending",
       "baseCommit": "1f98aa10fcab61b01e3015fb94a026609c4926f2",
       "documentation": "docs/EXPORT_SOURCE_PERMISSIONS.md",
       "remaining": [
-        "actual baseline PostgreSQL regression results",
-        "all-declared-external-source admission before new/cached export",
-        "peer/package/source/final-head CI and expected-head merge",
-        "current source export status/final fencing and host-human/rights lifecycle acceptance"
-      ]
+        "candidate real PG/real E11/unchanged peer/final-head CI qualification",
+        "public installed runtime/source review/rules/expected-head merge",
+        "current-source status/final post-render permission checks and host-human/complete rights/lifecycle acceptance"
+      ],
+      "reproduction": {
+        "source": "7b241d12bd8fe12163212a38e97e033e7ac9bae1",
+        "ordinaryJob": 134864591633,
+        "tests": 42,
+        "passes": 40,
+        "expectedFailures": 2,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "localEvidence": "typecheck/build/original-registry pass; copied prepared dependencies, no local PG/full suite/installed claim",
+      "verification": "docs/export-source-verification.json"
     }
   ],
   "approvedDesignSha256": {
