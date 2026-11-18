@@ -109,7 +109,8 @@
         "real pinned E11 and separate owning Editorial database integration",
         "package/source review and all final-head CI",
         "original human/current all-source rights and output/browser/host acceptance"
-      ]
+      ],
+      "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/2"
     }
   ],
   "approvedDesignSha256": {

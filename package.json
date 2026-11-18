@@ -35,7 +35,8 @@
     "check": "npm run typecheck && npm test && npm run build && node scripts/validate-registry.mjs",
     "prepare": "npm run build",
     "serve": "node src/engine/serve.ts",
-    "test:knowledge": "node --test integration/knowledge-http.test.ts"
+    "test:knowledge": "node --test integration/knowledge-http.test.ts",
+    "test:consent": "node --test integration/consent-http.test.ts"
   },
   "dependencies": {
     "pg": "8.23.1"
