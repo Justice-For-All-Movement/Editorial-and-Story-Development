@@ -675,7 +675,7 @@ test('registered asset target and rights references require export Consent even 
 test('all-source export retains literal adapt review, rejects unknown decisions and sanitizes host errors', needsPg, () => db(async sql => {
   const { id } = await doc(make(sql), [block('f')]);
   let mode = 'review'; let calls = 0;
-  const reader = make(sql, { ports: { useDecisions: { async decide(_ctx, request) {
+  const reader = make(sql, { ports: { knowledge: knowledge(), useDecisions: { async decide(_ctx, request) {
     calls++; assert.deepEqual(request.subjects, [CLAIM_CONTRACT]);
     if (mode === 'throw') throw new DomainError('private_host_code', 'SYNTHETIC_PRIVATE_DIAGNOSTIC');
     return { decision: mode as 'review', reasons: [], permissionRefs: [], restrictions: [], decidedAt: ctx().now };
@@ -703,7 +703,7 @@ test('all-source request rejects the whole over-budget dependency set before cal
 test('export captures original caller scope and options before host callbacks mutate their owners', needsPg, () => db(async sql => {
   const { id } = await doc(make(sql), [block('f')]);
   const caller = { ...ctx() }; const options = { audience: 'private-review', formats: ['markdown'] as ('markdown' | 'fountain')[] };
-  const e = make(sql, { ports: { authorization: { async authorize(current) {
+  const e = make(sql, { ports: { knowledge: knowledge(), authorization: { async authorize(current) {
     assert.equal(current.tenantId, 't1'); caller.tenantId = 'other'; options.audience = 'other'; options.formats[0] = 'fountain';
     return { allowed: true, reason: 'fictional host', policyVersion: 'fixture' };
   } }, useDecisions: { async decide(current, request) {
@@ -713,4 +713,79 @@ test('export captures original caller scope and options before host callbacks mu
   const exported = await e.exportDocument(caller, id, 1, options);
   assert.deepEqual(exported.manifest.formats, ['markdown']); assert.ok(exported.renderings.markdown); assert.equal(exported.renderings.fountain, undefined);
   assert.equal((await e.listExports(ctx(), id)).length, 1);
+}));
+
+test('saved verified_fact claim labels require current support on new and cached export', needsPg, () => db(async sql => {
+  const k = knowledge(); const e = make(sql, { ports: { knowledge: k, useDecisions: useDecisions() } });
+  const { id } = await doc(e, [block('f')]);
+  const options = { idempotencyKey: 'current-claim-export' };
+  const original = await e.exportDocument(ctx(), id, 1, options);
+  for (const value of [null, { factual: 'contested' }, { stale: true }, { blocked: true }]) {
+    k.set(CLAIM_CONTRACT, value);
+    await assert.rejects(e.exportDocument(ctx(), id, 1), fails('invalid_basis'));
+    await assert.rejects(e.exportDocument(ctx(), id, 1, options), fails('invalid_basis'));
+  }
+  const retained = await e.listExports(ctx(), id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
+  assert.equal((await e.get(ctx(), 'document', id)).body.blocks[0]!.basis, 'verified_fact', 'failure never silently relabels saved text');
+}));
+
+test('saved verified_fact finding labels cannot use historical or withdrawn metadata during export', needsPg, () => db(async sql => {
+  const ref = 'E08:finding:fictional-export@1';
+  let value: import('../src/engine/ports.ts').FindingStatus | null = { ref, state: 'approved', label: 'verified_fact', classification: 'established', stale: false, blocked: false };
+  const e = make(sql, { ports: { findings: { async getFindingStatus() { return value; } }, useDecisions: useDecisions() } });
+  const { id } = await doc(e, [block('f', { sources: [ref] })]);
+  const options = { idempotencyKey: 'current-finding-export' };
+  const original = await e.exportDocument(ctx(), id, 1, options);
+  const accepted = value;
+  for (const patch of [null, { state: 'withdrawn' as const }, { ref: 'E08:finding:fictional-export@2' }, { classification: 'disputed' as const }, { stale: true }, { blocked: true }]) {
+    value = patch === null ? null : { ...accepted!, ...patch };
+    await assert.rejects(e.exportDocument(ctx(), id, 1), fails('invalid_basis'));
+    await assert.rejects(e.exportDocument(ctx(), id, 1, options), fails('invalid_basis'));
+  }
+  const reader = make(sql, { config: { standalone: { knowledge: true } }, ports: { useDecisions: useDecisions() } });
+  await assert.rejects(reader.exportDocument(ctx(), id, 1), fails('unavailable'));
+  const retained = await e.listExports(ctx(), id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
+  assert.equal((await e.get(ctx(), 'document', id)).body.blocks[0]!.sources[0], ref);
+}));
+
+test('export requires explicit current source flags and sanitizes source callback/getter failures', needsPg, () => db(async sql => {
+  const { id } = await doc(make(sql), [block('f')]);
+  for (const mode of ['missing', 'throw', 'getter']) {
+    const e = make(sql, { ports: { useDecisions: useDecisions(), knowledge: { async getClaimStatus() {
+      if (mode === 'throw') throw new DomainError('private_host_code', 'SYNTHETIC_SOURCE_DIAGNOSTIC');
+      if (mode === 'getter') return { get factual() { throw new Error('SYNTHETIC_SOURCE_DIAGNOSTIC'); }, editorial: 'approved', stale: false, blocked: false };
+      return { factual: 'supported', editorial: 'approved' } as any;
+    } } } });
+    await assert.rejects(e.exportDocument(ctx(), id, 1), (error: any) => error instanceof DomainError
+      && error.code === (mode === 'missing' ? 'invalid_basis' : 'unavailable') && !String(error).includes('SYNTHETIC_SOURCE_DIAGNOSTIC'));
+    assert.equal((await e.listExports(ctx(), id)).length, 0);
+  }
+}));
+
+test('exact source editions and complete source budgets precede any export metadata callbacks', needsPg, () => db(async sql => {
+  const k = knowledge(), u = useDecisions(); const e = make(sql, { ports: { knowledge: k, useDecisions: u } });
+  const unversioned = await doc(e, [block('f', { sources: ['E07:claim:fictional-unversioned'] })]);
+  k.calls.length = 0; const consentBefore = u.calls.length;
+  await assert.rejects(e.exportDocument(ctx(), unversioned.id, 1), fails('unavailable', /Exact/));
+  assert.equal(k.calls.length, 0); assert.equal(u.calls.length, consentBefore);
+  const blocks = Array.from({ length: 5 }, (_, b) => block(`f${b}`, { sources: Array.from({ length: b === 4 ? 41 : 40 }, (_, n) => `E07:claim:metadata-${b}-${n}@1`) }));
+  const oversized = await doc(e, blocks); k.calls.length = 0;
+  await assert.rejects(e.exportDocument(ctx(), oversized.id, 1), fails('unavailable', /budget/));
+  assert.equal(k.calls.length, 0); assert.equal(u.calls.length, consentBefore);
+  assert.equal((await e.listExports(ctx(), oversized.id)).length, 0);
+}));
+
+test('a source callback cannot remove its port and skip a later current metadata obligation', needsPg, () => db(async sql => {
+  const { id } = await doc(make(sql), [block('f', { sources: [CLAIM_CONTRACT, CLAIM_DENIAL] })]);
+  let calls = 0;
+  const original = { async getClaimStatus(this: unknown) {
+    assert.equal(this, original, 'captured method keeps its original receiver'); calls++;
+    delete ports.knowledge;
+    return calls === 1 ? { factual: 'supported', editorial: 'approved', stale: false, blocked: false } : null;
+  } };
+  const ports: { knowledge?: import('../src/engine/ports.ts').KnowledgePort; useDecisions: ReturnType<typeof useDecisions> } = { knowledge: original, useDecisions: useDecisions() };
+  const e = make(sql, { ports });
+  await assert.rejects(e.exportDocument(ctx(), id, 1), fails('invalid_basis'));
+  assert.equal(calls, 2, 'second source is still checked after port removal');
+  assert.equal((await e.listExports(ctx(), id)).length, 0);
 }));

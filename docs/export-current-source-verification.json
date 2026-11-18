@@ -1,0 +1,62 @@
+{
+  "status": "reviewed candidate; actual 49 ordinary and E07/E08 source+fresh-installed peers pass; final method-capture regression and current-head CI/merge pending",
+  "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/5",
+  "base": "7eddc64099ab62dc866ac0af2231a47beee1bfd1",
+  "reproduction": {
+    "source": "c257908e0ab9a34617982154207fe0b29389c86b",
+    "ordinaryJob": 134872969108,
+    "tests": 47,
+    "passes": 45,
+    "expectedFailures": 2,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "initialRuntime": {
+    "source": "c523a94fa525818215e3d428a26cf2d4080a789a",
+    "ordinaryJob": 134874480170,
+    "passes": 45,
+    "failures": 2,
+    "reason": "two prior export-only fixtures lacked the now-required KnowledgePort; actual new guards passed; fixtures corrected without dropping assertions"
+  },
+  "localEvidence": "typecheck/build/original-registry pass; copied prepared deps, no local PG/full ordinary/installed-suite claim",
+  "limits": [
+    "fresh final50/actual E07-E08-E11 source-installed/current-head CI, rules and expected-head merge",
+    "final post-render current permission/visibility checks and host-human/complete source-rights/lifecycle acceptance"
+  ],
+  "sha256": {
+    "src/engine/index.ts": "03b4e6f1af93d6dfeedd89804860bc7814b7c21cb79c298fdb5e84f32aa0a1ec",
+    "tests/engine.test.ts": "833f5428f3fcc469096edf3bfbe2d2528d8ff04b0aadbacac48f1cb209ddbdd0",
+    "integration/knowledge-http.test.ts": "54e067b49cba861a0947dcf162567167cb76f179acf2e92a4e05c5d4b864231f",
+    "integration/finding-http.test.ts": "3224ea3616b5db30a3d102432de3c66ae2ecf4eeffb988a09cb9d4e4430d3a67",
+    ".github/workflows/ci.yml": "e0062f3efdfddc0714b0f1b229ac2edff225b8745ed5608262e51c4fd4c9bd75",
+    "docs/EXPORT_CURRENT_SOURCES.md": "467a48119cdc63126d1e0e4d2b1e8b50fd0b75be1d6aa6d2ba552d2f6913ede5",
+    "docs/ENGINE_API.md": "bed955fbecb55e0b433d211ee8ce39bbdf09d40770ba8de7fab0d26feeeee1cd"
+  },
+  "peerQualification": {
+    "source": "a24389bcc5144e23b071451dc066aef22edadca5",
+    "ordinaryJob": 134876978685,
+    "ordinaryTests": 49,
+    "realFactualJob": 134876978605,
+    "sourceFactualTests": 1,
+    "freshInstalledFactualTests": 1,
+    "passedFailuresCancelledSkipped": 0,
+    "realKnowledgeJob": 134876980169,
+    "knowledgeFailure": "invalid fixture: contested requires evidence links; now valid unassessed reset, all denial/readmission assertions preserved"
+  },
+  "qualifiedCi": {
+    "source": "a01423d380f6092a3c612e4514013ec0a78e6dc3",
+    "ordinaryJob": 134879253510,
+    "ordinaryTests": 49,
+    "realKnowledgeJob": 134879253425,
+    "knowledgeSourceTests": 1,
+    "knowledgeFreshInstalledTests": 1,
+    "realFactualJob": 134879253261,
+    "factualSourceTests": 1,
+    "factualFreshInstalledTests": 1,
+    "allHeadChecks": "8 success",
+    "failures": 0,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "sourceReview": "clear for exact complete captured-source admission and copied primitive metadata; last review captures each source method/receiver before callbacks to prevent partial skipping; new owning regression/current-head CI required"
+}
