@@ -36,7 +36,8 @@
     "prepare": "npm run build",
     "serve": "node src/engine/serve.ts",
     "test:knowledge": "node --test integration/knowledge-http.test.ts",
-    "test:consent": "node --test integration/consent-http.test.ts"
+    "test:consent": "node --test integration/consent-http.test.ts",
+    "test:factual": "node --test integration/finding-http.test.ts"
   },
   "dependencies": {
     "pg": "8.23.1"
