@@ -39,3 +39,6 @@ export function httpModelPort(options: { endpoint: string; apiKey?: string; time
 }
 export { httpKnowledgePort } from './knowledge-http.ts';
 export { httpUseDecisionPort } from './consent-http.ts';
+
+export { httpFindingPort } from './finding-http.ts';
+export type { FindingPort, FindingStatus, FindingHttpOptions } from './finding-http.ts';

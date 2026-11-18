@@ -101,7 +101,7 @@
     },
     {
       "id": "real-consent-http",
-      "status": "implemented and qualified candidate; final documentation-head CI/merge required",
+      "status": "accepted PR2; prior WIP notes historical",
       "baseCommit": "d1e6b0d569f03f7ee43af5f64622b20ec923b01e",
       "documentation": "docs/CONSENT_HTTP.md",
       "localEvidence": "11focused+11packed public-export groups;4preserved lyric/HTTP;typecheck/build/registry/strict declarations;5runtime bytes match;0fail/cancel/skip;copied prepared deps, not fresh install/full local PostgreSQL suite",
@@ -134,11 +134,22 @@
         "failures": 0,
         "cancelled": 0,
         "skips": 0
+      },
+      "sourceCommit": "285c69bb6f5ff34311012ae406731cd9482ab809",
+      "mergeCommit": "ee944d9986a760b54ad1443bf5350c55f090f507",
+      "finalCi": {
+        "ordinaryJob": 134759549836,
+        "ordinaryTests": 34,
+        "realConsentJob": 134759549421,
+        "realKnowledgeJob": 134759549774,
+        "peerTests": 2,
+        "failures": 0,
+        "skips": 0
       }
     },
     {
       "id": "export-replay-current-authority",
-      "status": "implemented and qualified candidate; final documentation-head CI/merge required",
+      "status": "accepted PR2; prior WIP notes historical",
       "documentation": "docs/EXPORT_REPLAY_AUTHORITY.md",
       "dependsOn": "real-consent-http PR2",
       "remaining": [
@@ -165,7 +176,31 @@
         "cancelled": 0,
         "skips": 0
       },
-      "sourceReview": "clear for scoped decision evaluation and fresh authority before cached private export disclosure; original fingerprint/effects/history preserved"
+      "sourceReview": "clear for scoped decision evaluation and fresh authority before cached private export disclosure; original fingerprint/effects/history preserved",
+      "sourceCommit": "285c69bb6f5ff34311012ae406731cd9482ab809",
+      "mergeCommit": "ee944d9986a760b54ad1443bf5350c55f090f507",
+      "finalCi": {
+        "ordinaryJob": 134759549836,
+        "ordinaryTests": 34,
+        "realConsentJob": 134759549421,
+        "realKnowledgeJob": 134759549774,
+        "peerTests": 2,
+        "failures": 0,
+        "skips": 0
+      }
+    },
+    {
+      "id": "current-factual-finding-http",
+      "status": "incomplete WIP; adapter exported but authoring/fact-check gap unresolved",
+      "baseCommit": "ee944d9986a760b54ad1443bf5350c55f090f507",
+      "documentation": "docs/FINDING_HTTP.md",
+      "localEvidence": "5focused synthetic local groups, typecheck/build pass; no full suite/installed/PG/live claim",
+      "remaining": [
+        "owning authoring and fact-check current-finding guard",
+        "actual pinned E08 integration",
+        "packed public exports/types/runtime and all final-head CI/source review",
+        "host current-human/all-source rights/render/browserAT acceptance"
+      ]
     }
   ],
   "approvedDesignSha256": {
