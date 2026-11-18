@@ -67,7 +67,7 @@
   "checkpoints": [
     {
       "id": "real-knowledge-http",
-      "status": "incomplete WIP; all final-head CI required",
+      "status": "accepted PR1; prior WIP notes historical",
       "baseCommit": "0639821bcd2efd4a6c0c3d6bc8961cbd3579d4f6",
       "documentation": "docs/KNOWLEDGE_HTTP.md",
       "localEvidence": "6 focused+6 packed public-export+4 preserved lyric/HTTP groups, typecheck/build/registry/declarations/3runtime bytes match; zero failures/skips; copied prepared consumer dependencies, not fresh install/full local suite",
@@ -87,7 +87,85 @@
         "ordinary": "25pass/1failure: obsolete invented-route test fixture; corrected locally; no weakened assertions"
       },
       "verification": "docs/knowledge-http-verification.json",
-      "sourceReview": "clear for conservative exact scoped metadata boundary"
+      "sourceReview": "clear for conservative exact scoped metadata boundary",
+      "sourceCommit": "26e2759a76e7285f82916725538ffa881dd48853",
+      "mergeCommit": "d1e6b0d569f03f7ee43af5f64622b20ec923b01e",
+      "finalCi": {
+        "ordinaryJob": 134724743874,
+        "ordinaryTests": 27,
+        "realKnowledgeJob": 134724743153,
+        "realKnowledgeTests": 1,
+        "failures": 0,
+        "skips": 0
+      }
+    },
+    {
+      "id": "real-consent-http",
+      "status": "implemented and qualified candidate; final documentation-head CI/merge required",
+      "baseCommit": "d1e6b0d569f03f7ee43af5f64622b20ec923b01e",
+      "documentation": "docs/CONSENT_HTTP.md",
+      "localEvidence": "11focused+11packed public-export groups;4preserved lyric/HTTP;typecheck/build/registry/strict declarations;5runtime bytes match;0fail/cancel/skip;copied prepared deps, not fresh install/full local PostgreSQL suite",
+      "remaining": [
+        "final documentation-head CI and expected-head merge",
+        "host current Identity/all-source rights, source services and broader creative workflow/quality acceptance"
+      ],
+      "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/2",
+      "verification": "docs/consent-http-verification.json",
+      "initialCi": {
+        "source": "6c0c12a33dc3b159d9bb4d89f1d1ca2a73a2cea0",
+        "ordinaryJob": 134752972538,
+        "ordinaryTests": 32,
+        "realConsentJob": 134752972427,
+        "realConsentTests": 1,
+        "realKnowledgeJob": 134752972413,
+        "realKnowledgeTests": 1,
+        "failures": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear for scoped decision evaluation and fresh authority before cached private export disclosure; original fingerprint/effects/history preserved",
+      "fixedCi": {
+        "source": "ef0c6dbb5a61f655fc988ff8914a72fba3bbd007",
+        "ordinaryJob": 134758309683,
+        "ordinaryTests": 34,
+        "realConsentJob": 134758309629,
+        "realConsentTests": 1,
+        "realKnowledgeJob": 134758309159,
+        "realKnowledgeTests": 1,
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
+    },
+    {
+      "id": "export-replay-current-authority",
+      "status": "implemented and qualified candidate; final documentation-head CI/merge required",
+      "documentation": "docs/EXPORT_REPLAY_AUTHORITY.md",
+      "dependsOn": "real-consent-http PR2",
+      "remaining": [
+        "final documentation-head CI and expected-head merge",
+        "host current Identity/all-source rights, source services and broader creative workflow/quality acceptance"
+      ],
+      "reproduction": {
+        "source": "7cb99b30c070cf0898ab849144f8ec8ad195a036",
+        "ordinaryJob": 134756132006,
+        "ordinaryPassed": 32,
+        "expectedRegressionFailures": 2,
+        "realConsentJob": 134756131570,
+        "expectedRegressionFailuresRealConsent": 1
+      },
+      "fixedCi": {
+        "source": "ef0c6dbb5a61f655fc988ff8914a72fba3bbd007",
+        "ordinaryJob": 134758309683,
+        "ordinaryTests": 34,
+        "realConsentJob": 134758309629,
+        "realConsentTests": 1,
+        "realKnowledgeJob": 134758309159,
+        "realKnowledgeTests": 1,
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear for scoped decision evaluation and fresh authority before cached private export disclosure; original fingerprint/effects/history preserved"
     }
   ],
   "approvedDesignSha256": {

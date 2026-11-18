@@ -4,11 +4,12 @@
 // EDITORIAL_STANDALONE (comma list of `knowledge`, `consent`: accept the documented unchecked modes when no port is configured),
 // EDITORIAL_ALLOW_SELF_APPROVAL (default false), EDITORIAL_CONFIG_FILE (JSON: languages, lexicons, templates, notices, formats),
 // KNOWLEDGE_URL + KNOWLEDGE_TOKEN_FILE (optional HTTP KnowledgePort), MODEL_ENDPOINT + MODEL_API_KEY_FILE (optional HTTP ModelPort).
+// CONSENT_URL + CONSENT_TOKEN_FILE optionally configure real E11 decisions (no actual use or dispatch).
 // The engine has no background jobs, so there is no worker loop.
 import { readFile } from 'node:fs/promises';
 import pg from 'pg';
 import { createHttpHandler, createTokenVerifier, objectStoreFromEnv, pgSql, serve } from '../service-kit.ts';
-import { createEngine, httpKnowledgePort, httpModelPort, manifest, migrate, routes } from './index.ts';
+import { createEngine, httpKnowledgePort, httpModelPort, httpUseDecisionPort, manifest, migrate, routes } from './index.ts';
 import type { EditorialConfig } from './index.ts';
 
 async function main(): Promise<void> {
@@ -20,7 +21,7 @@ async function main(): Promise<void> {
   const secret = async (file: string | undefined): Promise<string | undefined> => (file ? (await readFile(file, 'utf8')).trim() : undefined);
   const fileConfig = env.EDITORIAL_CONFIG_FILE ? JSON.parse(await readFile(env.EDITORIAL_CONFIG_FILE, 'utf8')) as EditorialConfig : {};
   const standalone = (env.EDITORIAL_STANDALONE ?? '').split(',').map((s) => s.trim());
-  const knowledgeToken = await secret(env.KNOWLEDGE_TOKEN_FILE), modelKey = await secret(env.MODEL_API_KEY_FILE);
+  const knowledgeToken = await secret(env.KNOWLEDGE_TOKEN_FILE), modelKey = await secret(env.MODEL_API_KEY_FILE), consentToken = await secret(env.CONSENT_TOKEN_FILE);
   const pool = new pg.Pool({ connectionString: env.DATABASE_URL, max: 10 });
   const sql = pgSql(pool);
   await migrate(sql);
@@ -28,6 +29,7 @@ async function main(): Promise<void> {
     sql,
     ...(env.OBJECT_STORE !== undefined || env.OBJECT_STORE_PATH !== undefined ? { objects: objectStoreFromEnv(env, './data/objects') } : {}),
     ports: {
+      ...(env.CONSENT_URL ? { useDecisions: httpUseDecisionPort({ baseUrl: env.CONSENT_URL, ...(consentToken === undefined ? {} : { token: consentToken }) }) } : {}),
       ...(env.KNOWLEDGE_URL ? { knowledge: httpKnowledgePort({ baseUrl: env.KNOWLEDGE_URL, ...(knowledgeToken === undefined ? {} : { token: knowledgeToken }) }) } : {}),
       ...(env.MODEL_ENDPOINT ? { model: httpModelPort({ endpoint: env.MODEL_ENDPOINT, ...(modelKey === undefined ? {} : { apiKey: modelKey }) }) } : {}),
     },

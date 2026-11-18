@@ -804,7 +804,8 @@ export function createEngine(deps: EditorialDeps) {
       requireCapability(ctx, 'editorial:export');
       if (ports.authorization !== undefined) { const a = await ports.authorization.authorize(ctx, { capability: 'editorial:export', resource: uref(EID, 'document', UUID.test(documentId) ? documentId : 'unknown') }); if (!a.allowed) throw new DomainError('forbidden', 'Export is not authorized'); }
       const { idempotencyKey, ...rest } = options;
-      return sql.tx((tx) => idem(tx, ctx, idempotencyKey, { op: 'export', documentId, revision, ...rest }, async () => {
+      return sql.tx(async (tx) => {
+        // Replays disclose private content too: current authority must precede the cache.
         const l = await need(tx, ctx, 'document', documentId, { revision: posInt(revision, 'revision') });
         const body = l.r.body;
         const formatsWanted = [...new Set(options.formats === undefined ? defaultFormats(body.docType) : options.formats.map((f) => oneOf(f, 'format', EXPORT_FORMATS)))];
@@ -829,30 +830,32 @@ export function createEngine(deps: EditorialDeps) {
           if (intendedUse === 'publish' && isRec(d) && d.decision === 'review') throw new DomainError('consent_denied', `Publishing block ${b.id} requires a consent review that has not been completed`);
           useDecisions.push(d);
         }
-        const renderings: ExportResult['renderings'] = {};
-        if (formatsWanted.includes('markdown')) renderings.markdown = renderMarkdown(view.doc);
-        if (formatsWanted.includes('fountain')) renderings.fountain = renderFountain(view.doc);
-        if (formatsWanted.includes('lyric_sheet')) renderings.lyricSheet = renderLyricSheet(view.doc);
-        if (formatsWanted.includes('graph')) { invariant(body.docType === 'interactive_story', 'invalid_input', 'The graph format applies to interactive stories'); renderings.graph = renderGraph(view.doc); }
-        const exportId = randomUUID();
-        const byRole = (roles: string[]): string[] => [...new Set(linkRows.filter((r) => roles.includes(r.role)).map((r) => r.ref))].sort();
-        const scopeKey = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
-        const objectKey = deps.objects !== undefined && scopeKey.test(ctx.tenantId) && scopeKey.test(ctx.projectId) ? `${ctx.tenantId}/${ctx.projectId}/exports/${documentId}/${exportId}.json` : null;
-        const manifestOut: ExportManifest = {
-          exportId, engine: EID, engineVersion: manifest.version, document: view.doc.document.ref, revision: l.r.revision, contentDigest: l.r.digest, reviewState: l.r.review_state,
-          approval: approval === null ? null : { id: approval.id, status: approval.status, approverId: approval.approverId, at: approval.at }, formats: formatsWanted,
-          renderingDigests: Object.fromEntries(Object.entries(renderings).map(([k, v]) => [k, sha(typeof v === 'string' ? v : JSON.stringify(v))])),
-          sourceRefs: byRole(['source']), assetRefs: byRole(['asset', 'asset_dep']), viewpointRefs: byRole(['viewpoint', 'viewpoint_dep']), packageRefs: byRole(['package']), translationOf: view.doc.document.translationOf?.ref ?? null,
-          labels: view.doc.labels, credits: view.doc.credits, disclosures: view.doc.disclosures, openFlags: flags.map((f) => ({ blockId: f.blockId, kind: f.kind, reason: f.reason, cause: f.cause })),
-          useDecisions, intendedUse, exportedAt: ctx.now, exportedBy: ctx.actor.id, objectKey,
-        };
-        const result: ExportResult = { manifest: manifestOut, document: view.doc, renderings };
-        if (objectKey !== null && deps.objects !== undefined) await deps.objects.put(objectKey, new TextEncoder().encode(JSON.stringify(clean(result))));
-        await tx.query(`insert into ${S}.exports (tenant_id, project_id, id, object_id, revision, formats, manifest, digest, object_key, actor_id, at) values ($1,$2,$3,$4,$5,$6::text[],$7::jsonb,$8,$9,$10,$11)`, [...scope(ctx), exportId, documentId, l.r.revision, formatsWanted, JSON.stringify(clean(manifestOut)), l.r.digest, objectKey, ctx.actor.id, ctx.now]);
-        await appendAudit(tx, S, ctx, 'document.exported', uref(EID, 'document', documentId), { export: exportId, revision: l.r.revision, digest: l.r.digest, formats: formatsWanted, intendedUse });
-        await emitEvent(tx, S, ctx, 'editorial.exported', view.doc.document.ref, { export: uref(EID, 'export', exportId), revision: l.r.revision, digest: l.r.digest, formats: formatsWanted });
-        return result;
-      }));
+        return idem(tx, ctx, idempotencyKey, { op: 'export', documentId, revision, ...rest }, async () => {
+          const renderings: ExportResult['renderings'] = {};
+          if (formatsWanted.includes('markdown')) renderings.markdown = renderMarkdown(view.doc);
+          if (formatsWanted.includes('fountain')) renderings.fountain = renderFountain(view.doc);
+          if (formatsWanted.includes('lyric_sheet')) renderings.lyricSheet = renderLyricSheet(view.doc);
+          if (formatsWanted.includes('graph')) { invariant(body.docType === 'interactive_story', 'invalid_input', 'The graph format applies to interactive stories'); renderings.graph = renderGraph(view.doc); }
+          const exportId = randomUUID();
+          const byRole = (roles: string[]): string[] => [...new Set(linkRows.filter((r) => roles.includes(r.role)).map((r) => r.ref))].sort();
+          const scopeKey = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+          const objectKey = deps.objects !== undefined && scopeKey.test(ctx.tenantId) && scopeKey.test(ctx.projectId) ? `${ctx.tenantId}/${ctx.projectId}/exports/${documentId}/${exportId}.json` : null;
+          const manifestOut: ExportManifest = {
+            exportId, engine: EID, engineVersion: manifest.version, document: view.doc.document.ref, revision: l.r.revision, contentDigest: l.r.digest, reviewState: l.r.review_state,
+            approval: approval === null ? null : { id: approval.id, status: approval.status, approverId: approval.approverId, at: approval.at }, formats: formatsWanted,
+            renderingDigests: Object.fromEntries(Object.entries(renderings).map(([k, v]) => [k, sha(typeof v === 'string' ? v : JSON.stringify(v))])),
+            sourceRefs: byRole(['source']), assetRefs: byRole(['asset', 'asset_dep']), viewpointRefs: byRole(['viewpoint', 'viewpoint_dep']), packageRefs: byRole(['package']), translationOf: view.doc.document.translationOf?.ref ?? null,
+            labels: view.doc.labels, credits: view.doc.credits, disclosures: view.doc.disclosures, openFlags: flags.map((f) => ({ blockId: f.blockId, kind: f.kind, reason: f.reason, cause: f.cause })),
+            useDecisions, intendedUse, exportedAt: ctx.now, exportedBy: ctx.actor.id, objectKey,
+          };
+          const result: ExportResult = { manifest: manifestOut, document: view.doc, renderings };
+          if (objectKey !== null && deps.objects !== undefined) await deps.objects.put(objectKey, new TextEncoder().encode(JSON.stringify(clean(result))));
+          await tx.query(`insert into ${S}.exports (tenant_id, project_id, id, object_id, revision, formats, manifest, digest, object_key, actor_id, at) values ($1,$2,$3,$4,$5,$6::text[],$7::jsonb,$8,$9,$10,$11)`, [...scope(ctx), exportId, documentId, l.r.revision, formatsWanted, JSON.stringify(clean(manifestOut)), l.r.digest, objectKey, ctx.actor.id, ctx.now]);
+          await appendAudit(tx, S, ctx, 'document.exported', uref(EID, 'document', documentId), { export: exportId, revision: l.r.revision, digest: l.r.digest, formats: formatsWanted, intendedUse });
+          await emitEvent(tx, S, ctx, 'editorial.exported', view.doc.document.ref, { export: uref(EID, 'export', exportId), revision: l.r.revision, digest: l.r.digest, formats: formatsWanted });
+          return result;
+        });
+      });
     },
     async listExports(ctx: ServiceContext, documentId: string): Promise<ExportManifest[]> {
       requireCapability(ctx, 'editorial:read');
