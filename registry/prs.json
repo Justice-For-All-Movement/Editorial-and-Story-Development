@@ -410,13 +410,12 @@
     },
     {
       "id": "export-dependency-visibility",
-      "status": "reviewed qualified runtime; final documentation-head CI/rules/expected-head merge pending",
+      "status": "accepted PR7; earlier candidate notes historical",
       "baseCommit": "9fe2e1d2db486e36caef52970af49483cd7bb181",
       "regressionCommit": "3d72b676e14b9e7777c578d35005adc8a6bb5035",
       "documentation": "docs/EXPORT_DEPENDENCY_VISIBILITY.md",
       "verification": "docs/export-dependency-visibility-verification.json",
       "remaining": [
-        "final documentation-head current checks/rules/expected-head merge",
         "post-storage whole-source/own visibility/recursive E09/current-human/rights/lifecycle qualification"
       ],
       "limits": "current own metadata visibility only; no system read/drop fallback; synthetic use decisions not authentication/complete rights; retain history/unknown objects, no cleanup/distributed fence",
@@ -443,7 +442,66 @@
         "failures": 0,
         "cancelled": 0,
         "skips": 0
+      },
+      "sourceCommit": "54e021c912c8b8cfc901bcbe25102ed09edac110",
+      "mergeCommit": "4387e05b7a33305509fba962ac7aae83c1635413",
+      "finalCi": {
+        "ordinaryJob": 135020983271,
+        "ordinaryTests": 57,
+        "consentAndAuthorityJob": 135020983670,
+        "focusedSourceTests": 7,
+        "focusedFreshInstalledPublicEngineTests": 7,
+        "actualE11SourceTests": 1,
+        "actualE11FreshInstalledPublicServeTests": 1,
+        "knowledgeJob": 135020983722,
+        "factualJob": 135020983736,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
       }
+    },
+    {
+      "id": "export-final-visibility",
+      "status": "reviewed qualified runtime; final documentation-head CI/rules/expected-head merge pending",
+      "baseCommit": "4387e05b7a33305509fba962ac7aae83c1635413",
+      "regressionCommit": "655c669d7c7d89a80b9d6127affe4b2e350d65d6",
+      "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/8",
+      "documentation": "docs/EXPORT_FINAL_VISIBILITY.md",
+      "local": "typecheck passed on prepared dependencies; no local PG/full or installed result",
+      "remaining": [
+        "fresh final documentation-head full/peer checks/rules/expected merge",
+        "source review/fresh head checks/rules/expected merge",
+        "final upstream rights/approvals/withdrawal/recursive source mapping and host human/lifecycle/unknown storage qualification"
+      ],
+      "limits": "conservative ALL historical project credits visibility in final coherent own snapshot, bounded1024revisions/512KiB/1024collaborators/viewpoints; own snapshot not continuous auth/whole-source/distributed fencing; retain all history/unknown outputs",
+      "runtimeCommit": "54e21589a9055b637ef3b0dbd42fb84f0e00fd98",
+      "baseline": {
+        "ordinaryJob": 135126424377,
+        "tests": 61,
+        "passes": 57,
+        "failures": 4,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "verification": "docs/export-final-visibility-verification.json",
+      "qualifiedRuntimeCommit": "e36d3711b71186388ca40dd84d50fa9afffae91c",
+      "qualifiedCi": {
+        "ordinaryJob": 135164805935,
+        "ordinaryTests": 64,
+        "consentAndAuthorityJob": 135164774787,
+        "focusedSourceTests": 14,
+        "focusedFreshInstalledPublicEngineTests": 14,
+        "actualE11SourceTests": 1,
+        "actualE11FreshInstalledPublicServeTests": 1,
+        "knowledgeJob": 135164806423,
+        "factualJob": 135164806695,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear for final coherent read-only own visibility, bounded ALL historical contributors and original effects; conservative denial and no whole-source/current-human/fence claims explicit"
     }
   ],
   "approvedDesignSha256": {

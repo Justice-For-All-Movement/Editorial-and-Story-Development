@@ -1,0 +1,9 @@
+{
+  "sha256": {
+    "src/engine/index.ts": "adbdab5924038326a3f745f26104150e021d93955415752a41491f9e628ab054",
+    "tests/export-final-visibility.test.ts": "970d04a73165c15f78142e00b242ff2217727ab9841c4f74a330c296c1f5500c",
+    ".github/workflows/ci.yml": "33012093e831606828b94d3d76f98457ee631da9df52facd89ba6caeaa654888",
+    "docs/EXPORT_FINAL_VISIBILITY.md": "1e994c1e13bd632a14cc1340045392581389ab6aa396fe7640508a83b236e038",
+    "docs/ENGINE_API.md": "39fef736c948303cf1a418920ac50893c10aee772ebe38e8a5eac86f0438f45a"
+  }
+}

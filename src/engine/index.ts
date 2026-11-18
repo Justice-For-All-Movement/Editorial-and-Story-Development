@@ -593,6 +593,39 @@ export function createEngine(deps: EditorialDeps) {
       credits, blocks, disclosures: collectDisclosures(body.blocks), sources: [...new Set(body.blocks.flatMap((b) => b.sources))],
     } };
   }
+  /** Final own-engine visibility only. Legacy acknowledgements omit credit IDs, so retain all historical obligations. */
+  async function finalExportVisibility(ctx: ServiceContext, id: string, revision: number, result: ExportResult): Promise<void> {
+    await sql.tx(async tx => {
+      // A fresh coherent own-DB snapshot begins AFTER export COMMIT and the final host callback.
+      await tx.query('set transaction isolation level repeatable read read only');
+      const selected = await need(tx, ctx, 'document', id, { revision });
+      invariant(result.manifest.document === uref(EID, 'document', id, revision) && result.manifest.contentDigest === selected.r.digest,
+        'invalid_state', 'The retained export does not match its selected document');
+      const projectId = selected.r.body.editorialProjectId;
+      await need(tx, ctx, 'editorial_project', projectId);
+      const budget = (await tx.query<{ n: number; bytes: string }>(`select count(*)::integer as n, coalesce(sum(octet_length((body->'credits')::text)),0)::text as bytes
+        from (select body from ${S}.revisions where tenant_id=$1 and project_id=$2 and object_id=$3 order by revision limit 1025) history`, [...scope(ctx), projectId]))[0];
+      invariant(budget !== undefined && budget.n <= 1024 && Number(budget.bytes) <= 512 * 1024,
+        'unavailable', 'Complete historical export visibility exceeds its budget');
+      const histories = await tx.query<{ credits: unknown }>(`select body->'credits' as credits from ${S}.revisions
+        where tenant_id=$1 and project_id=$2 and object_id=$3 order by revision limit 1025`, [...scope(ctx), projectId]);
+      invariant(histories.length === budget.n && histories.length > 0, 'unavailable', 'Historical export visibility is unavailable');
+      const collaborators = new Set<string>();
+      for (const row of histories) {
+        invariant(Array.isArray(row.credits), 'unavailable', 'Historical export visibility is unavailable');
+        for (const credit of row.credits) {
+          invariant(isRec(credit) && typeof credit.collaboratorId === 'string' && UUID.test(credit.collaboratorId),
+            'unavailable', 'Historical export visibility is unavailable');
+          collaborators.add(credit.collaboratorId);
+          invariant(collaborators.size <= 1024, 'unavailable', 'Complete historical export visibility exceeds its budget');
+        }
+      }
+      for (const collaborator of [...collaborators].sort()) await need(tx, ctx, 'collaborator', collaborator);
+      const viewpoints = [...new Set(selected.r.body.blocks.flatMap(b => b.viewpointId === undefined ? [] : [b.viewpointId]))].sort();
+      invariant(viewpoints.length <= 1024, 'unavailable', 'Complete export visibility exceeds its budget');
+      for (const viewpoint of viewpoints) await need(tx, ctx, 'viewpoint', viewpoint);
+    });
+  }
   function applyProposal(body: DocumentBody, p: SuggestionProposal, block: Block): DocumentBody {
     const blocks = [...body.blocks];
     if (p.mode === 'replace') { const i = blocks.findIndex((b) => b.id === p.blockId); invariant(i >= 0, 'invalid_state', 'The block this suggestion replaces no longer exists'); blocks[i] = { ...block, id: p.blockId as string }; }
@@ -971,6 +1004,7 @@ export function createEngine(deps: EditorialDeps) {
       // Includes cached acknowledgements and waits for the actual SQL outcome before this final admission.
       // A committed export remains retained even when no content can be returned to this caller.
       await authorize();
+      await finalExportVisibility(ctx, documentId, revision, result);
       return result;
     },
     async listExports(ctx: ServiceContext, documentId: string): Promise<ExportManifest[]> {
