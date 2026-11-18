@@ -61,6 +61,21 @@ jobs:
           E07_DIR: ${{ github.workspace }}/.engines/knowledge
           TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
 
+      - name: Build and normally install private package for real knowledge export checks
+        run: |
+          npm run build
+          artifact=$(npm pack --pack-destination "$RUNNER_TEMP" --json | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s)[0].filename));')
+          mkdir -p "$RUNNER_TEMP/editorial-knowledge-consumer"
+          cd "$RUNNER_TEMP/editorial-knowledge-consumer"
+          npm init -y
+          npm install "$RUNNER_TEMP/$artifact"
+      - name: Run actual knowledge export checks through installed public engine
+        run: npm run test:knowledge
+        env:
+          E07_DIR: ${{ github.workspace }}/.engines/knowledge
+          TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
+          EDITORIAL_PACKAGE_ROOT: ${{ runner.temp }}/editorial-knowledge-consumer
+
   consent-http:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -139,3 +154,18 @@ jobs:
         env:
           E08_DIR: ${{ github.workspace }}/.engines/factual
           TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
+
+      - name: Build and normally install private package for real factual export checks
+        run: |
+          npm run build
+          artifact=$(npm pack --pack-destination "$RUNNER_TEMP" --json | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s)[0].filename));')
+          mkdir -p "$RUNNER_TEMP/editorial-factual-consumer"
+          cd "$RUNNER_TEMP/editorial-factual-consumer"
+          npm init -y
+          npm install "$RUNNER_TEMP/$artifact"
+      - name: Run actual factual export checks through installed public engine
+        run: npm run test:factual
+        env:
+          E08_DIR: ${{ github.workspace }}/.engines/factual
+          TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
+          EDITORIAL_PACKAGE_ROOT: ${{ runner.temp }}/editorial-factual-consumer

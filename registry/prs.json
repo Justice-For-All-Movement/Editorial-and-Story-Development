@@ -286,7 +286,7 @@
     },
     {
       "id": "export-current-source-metadata",
-      "status": "implemented candidate WIP; local typecheck/build pass, actual baseline/runtime/peer/package/CI qualification pending",
+      "status": "implemented candidate; baseline 45pass/2fail reproduced; current runtime/peer/installed/final-head qualification pending",
       "baseCommit": "7eddc64099ab62dc866ac0af2231a47beee1bfd1",
       "documentation": "docs/EXPORT_CURRENT_SOURCES.md",
       "remaining": [
@@ -294,7 +294,25 @@
         "current E07/E08 admission before new/cached export",
         "actual peers/installed/source/current-head qualification and expected-head merge",
         "final post-render/current-human/complete source-rights/host lifecycle acceptance"
-      ]
+      ],
+      "reproduction": {
+        "source": "c257908e0ab9a34617982154207fe0b29389c86b",
+        "ordinaryJob": 134872969108,
+        "tests": 47,
+        "passes": 45,
+        "expectedFailures": 2,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "initialRuntime": {
+        "source": "c523a94fa525818215e3d428a26cf2d4080a789a",
+        "ordinaryJob": 134874480170,
+        "passes": 45,
+        "failures": 2,
+        "reason": "two prior export-only fixtures lacked the now-required KnowledgePort; actual new guards passed; fixtures corrected without dropping assertions"
+      },
+      "localEvidence": "typecheck/build/original-registry pass; copied prepared deps, no local PG/full ordinary/installed-suite claim",
+      "verification": "docs/export-current-source-verification.json"
     }
   ],
   "approvedDesignSha256": {

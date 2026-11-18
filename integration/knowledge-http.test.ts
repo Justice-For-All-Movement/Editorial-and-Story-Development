@@ -4,11 +4,12 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { createServer } from 'node:http';
 import { resolve } from 'node:path';
+import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import pg from 'pg';
 import { generateSigningKey, signAccessToken, withDisposableDatabase } from '../src/service-kit.ts';
 import { httpKnowledgePort } from '../src/engine/ports.ts';
-import { ctx } from '../tests/fixtures.ts';
+import { ctx, project, block } from '../tests/fixtures.ts';
 
 test('Editorial reads the real E07 claim route and current assessment tracks without edition or scope substitution', async () => {
   const directory = process.env.E07_DIR, admin = process.env.TEST_DATABASE_URL;
@@ -47,9 +48,29 @@ test('Editorial reads the real E07 claim route and current assessment tracks wit
       await assert.rejects(port.getClaimStatus(ctx({ tenantId: 'other' }), made.ref));
       assert.equal(requests, before, 'foreign caller scope never uses the service credential');
       assert.equal(await port.getClaimStatus(ctx(), `E07:claim:${randomUUID()}@1`), null);
-      const changed = await send('PATCH', `/v1/claims/${made.id}`, { expectedRevision: 1, reason: 'Fictional withdrawal test', state: 'withdrawn' });
-      await assert.rejects(port.getClaimStatus(ctx(), made.ref), 'old citations cannot borrow a newer claim assessment');
-      assert.equal((await port.getClaimStatus(ctx(), changed.ref))?.blocked, true);
+      await withDisposableDatabase(pg, admin, async (_ownUrl, ownSql) => {
+        const entry = process.env.EDITORIAL_PACKAGE_ROOT === undefined ? resolve('src/engine/index.ts')
+          : createRequire(resolve(process.env.EDITORIAL_PACKAGE_ROOT, 'package.json')).resolve('@accountability/editorial-story/engine');
+        const editorialModule = await import(pathToFileURL(entry).href);
+        await editorialModule.migrate(ownSql);
+        const editorial = editorialModule.createEngine({ sql: ownSql, ports: { knowledge: port }, config: { standalone: { useDecisions: true } } });
+        const p = await editorial.create(ctx(), 'editorial_project', { body: project() });
+        const d = await editorial.create(ctx(), 'document', { body: { title: 'Fictional exact-source draft', editorialProjectId: p.id, docType: 'article', language: 'en', blocks: [block('f', { sources: [made.ref] })] } });
+        const options = { idempotencyKey: 'real-current-claim' };
+        const original = await editorial.exportDocument(ctx(), d.id, 1, options);
+        await send('POST', `/v1/claims/${made.id}/assessments`, { dimension: 'factual', value: 'contested', documentedRationale: true,
+          rationale: 'A fictional contrary record changes the controlled metadata assessment for this test only.' });
+        for (const input of [options, {}]) await assert.rejects(editorial.exportDocument(ctx(), d.id, 1, input), (e: any) => e.code === 'invalid_basis');
+        await send('POST', `/v1/claims/${made.id}/assessments`, { dimension: 'factual', value: 'supported', documentedRationale: true,
+          rationale: 'A fictional documented reassessment restores the controlled metadata value for this test only.' });
+        assert.equal((await editorial.exportDocument(ctx(), d.id, 1, options)).manifest.exportId, original.manifest.exportId, 'readmission returns the original ACK, not another export');
+        const changed = await send('PATCH', `/v1/claims/${made.id}`, { expectedRevision: 1, reason: 'Fictional withdrawal test', state: 'withdrawn' });
+        await assert.rejects(port.getClaimStatus(ctx(), made.ref), 'old citations cannot borrow a newer claim assessment');
+        assert.equal((await port.getClaimStatus(ctx(), changed.ref))?.blocked, true);
+        for (const input of [options, {}]) await assert.rejects(editorial.exportDocument(ctx(), d.id, 1, input), (e: any) => e.code === 'unavailable');
+        const history = await editorial.listExports(ctx(), d.id); assert.equal(history.length, 1); assert.equal(history[0].exportId, original.manifest.exportId);
+        const retained = await editorial.get(ctx(), 'document', d.id); assert.equal(retained.digest, d.digest); assert.equal(retained.body.blocks[0].basis, 'verified_fact');
+      });
     } finally { server.closeAllConnections(); await new Promise<void>(r => server.close(() => r())); }
   });
 });

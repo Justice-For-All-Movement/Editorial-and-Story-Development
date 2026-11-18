@@ -4,10 +4,11 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import { createRequire } from 'node:module';
 import { randomUUID } from 'node:crypto';
 import pg from 'pg';
 import { generateSigningKey, signAccessToken, withDisposableDatabase } from '../src/service-kit.ts';
-import { createEngine, migrate, httpFindingPort } from '../src/engine/index.ts';
+import { httpFindingPort } from '../src/engine/index.ts';
 import { ctx, project, block } from '../tests/fixtures.ts';
 
 test('real E08 draft/approval/withdrawal metadata gates owning Editorial authoring without latest substitution', async () => {
@@ -45,7 +46,11 @@ test('real E08 draft/approval/withdrawal metadata gates owning Editorial authori
       const before = reads; await assert.rejects(port.getFindingStatus(ctx({ tenantId: 'foreign' }), draft.ref)); assert.equal(reads, before);
       assert.equal(await port.getFindingStatus(ctx(), 'E08:finding:missing@1'), null);
       await withDisposableDatabase(pg, admin, async (_editorialUrl, ownSql) => {
-        await migrate(ownSql); const editorial = createEngine({ sql: ownSql, ports: { findings: port } });
+        const entry = process.env.EDITORIAL_PACKAGE_ROOT === undefined ? resolve('src/engine/index.ts')
+          : createRequire(resolve(process.env.EDITORIAL_PACKAGE_ROOT, 'package.json')).resolve('@accountability/editorial-story/engine');
+        const editorialModule = await import(pathToFileURL(entry).href);
+        await editorialModule.migrate(ownSql);
+        const editorial = editorialModule.createEngine({ sql: ownSql, ports: { findings: port }, config: { standalone: { useDecisions: true } } });
         const p = await editorial.create(ctx(), 'editorial_project', { body: project() });
         const save = (ref: string) => editorial.create(ctx(), 'document', { body: { title: 'Fictional private draft', editorialProjectId: p.id, docType: 'article', language: 'en', blocks: [block('f', { text: 'An invented statement.', sources: [ref] })] } });
         await assert.rejects(save(draft.ref), (e: any) => e.code === 'invalid_basis');
@@ -56,11 +61,15 @@ test('real E08 draft/approval/withdrawal metadata gates owning Editorial authori
         const saved = await save(approved.ref);
         const ledger = await editorial.factCheck(ctx(), saved.id); assert.equal(ledger.statements[0]?.status, 'supported');
         assert.equal((ledger.statements[0]?.sources[0]?.current as any).ref, approved.ref);
+        const options = { idempotencyKey: 'real-current-finding' };
+        const original = await editorial.exportDocument(ctx(), saved.id, 1, options);
         const withdrawn = await send(`/v1/findings/${draft.id}/withdraw`, { rationale: 'Fictional withdrawal fixture.' });
         assert.equal((await port.getFindingStatus(ctx(), withdrawn.ref))?.state, 'withdrawn');
         await assert.rejects(save(approved.ref), 'no stale-edition substitution after withdrawal');
         await assert.rejects(save(withdrawn.ref), (e: any) => e.code === 'invalid_basis');
         await assert.rejects(editorial.factCheck(ctx(), saved.id), 'changed edition withholds the whole current report');
+        for (const input of [options, {}]) await assert.rejects(editorial.exportDocument(ctx(), saved.id, 1, input), (e: any) => e.code === 'unavailable');
+        const history = await editorial.listExports(ctx(), saved.id); assert.equal(history.length, 1); assert.equal(history[0].exportId, original.manifest.exportId);
         assert.equal((await editorial.get(ctx(), 'document', saved.id)).digest, saved.digest);
         assert.equal((await editorial.get(ctx(), 'document', saved.id)).body.blocks[0]?.text, 'An invented statement.');
       });
