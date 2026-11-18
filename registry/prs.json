@@ -410,17 +410,40 @@
     },
     {
       "id": "export-dependency-visibility",
-      "status": "incomplete WIP; local typecheck/build/original-registry pass; actual PG source-installed/current-head CI review merge pending",
+      "status": "reviewed qualified runtime; final documentation-head CI/rules/expected-head merge pending",
       "baseCommit": "9fe2e1d2db486e36caef52970af49483cd7bb181",
       "regressionCommit": "3d72b676e14b9e7777c578d35005adc8a6bb5035",
       "documentation": "docs/EXPORT_DEPENDENCY_VISIBILITY.md",
       "verification": "docs/export-dependency-visibility-verification.json",
       "remaining": [
-        "inspect actual baseline and fixed PG/normal-installed/full-current-head CI",
-        "source review/rules/expected-head merge",
+        "final documentation-head current checks/rules/expected-head merge",
         "post-storage whole-source/own visibility/recursive E09/current-human/rights/lifecycle qualification"
       ],
-      "limits": "current own metadata visibility only; no system read/drop fallback; synthetic use decisions not authentication/complete rights; retain history/unknown objects, no cleanup/distributed fence"
+      "limits": "current own metadata visibility only; no system read/drop fallback; synthetic use decisions not authentication/complete rights; retain history/unknown objects, no cleanup/distributed fence",
+      "runtimeCommit": "1811fbb67b3bb7e07c521b6cf6e7f4c2a408a9dd",
+      "baseline": {
+        "ordinaryJob": 135017541796,
+        "tests": 57,
+        "passes": 54,
+        "failures": 3,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "qualifiedCi": {
+        "ordinaryJob": 135018893851,
+        "ordinaryTests": 57,
+        "consentAndAuthorityJob": 135018893709,
+        "focusedSourceTests": 7,
+        "focusedFreshInstalledPublicEngineTests": 7,
+        "actualE11SourceTests": 1,
+        "actualE11FreshInstalledPublicServeTests": 1,
+        "knowledgeJob": 135018893694,
+        "factualJob": 135018893232,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
     }
   ],
   "approvedDesignSha256": {
