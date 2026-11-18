@@ -1,5 +1,5 @@
 {
-  "status": "incomplete WIP correction; current source/normal fresh-installed qualification pending",
+  "status": "runtime qualified; final documentation-head checks and merge pending",
   "base": "5bfdc24679926ce474124a534c78ba9a84911a6c",
   "reproduction": {
     "source": "00ec2b9b4b6a66b857ff76b87317f7d7ee1587af",
@@ -21,7 +21,25 @@
     "src/engine/index.ts": "4cbcbdfef695602d8251aca64870578af36f90f34a3d3c1e1a9aebcdf9aef25c",
     "tests/export-final-admission.test.ts": "b55ed4b805f2fd337bc4d997ccf9a744a034410a14d6c68dc5199d31c4319672",
     ".github/workflows/ci.yml": "57e82513f3d020f1e5537ad24b108b8cd9d7d1ed4902e436cc0e135a722e69e5",
-    "docs/EXPORT_FINAL_ADMISSION.md": "b71abca28c0dcd158238d4bb5bb95eee6c8d2f82b1287d1c3175900dc6346cd7",
+    "docs/EXPORT_FINAL_ADMISSION.md": "fe3e40f32021acd238b338ce68a4fa2f55ff5705986552c5ae45623e635312fe",
     "docs/ENGINE_API.md": "15b0f6e01c7334d6d4f3b1e4e8bc0baf3d91a9c17773d088a1a11cf2c42902e8"
-  }
+  },
+  "qualifiedRuntimeCommit": "404138f516bf14a4f2f71792ef129ba2c192c192",
+  "qualifiedCi": {
+    "ordinaryJob": 135203983022,
+    "ordinaryTests": 70,
+    "focusedJob": 135203982520,
+    "focusedSourceTests": 20,
+    "normalFreshInstalledPublicEngineTests": 20,
+    "actualE11Source": 1,
+    "actualE11InstalledServe": 1,
+    "actualE07Job": 135203982987,
+    "actualE08Job": 135203982982,
+    "actualE07E08SourceAndInstalledEach": 1,
+    "allRuntimeHeadChecks": "8 success",
+    "failures": 0,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "sourceReview": "clear for same final coherent selected edition snapshot, own recorded withdrawal/selected blocked flags/requested required active exact-digest approval; manifests/effects historical unchanged; sequential snapshot/current-human/external/recursive host limits explicit"
 }
