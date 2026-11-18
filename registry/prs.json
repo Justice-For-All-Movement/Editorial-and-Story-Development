@@ -228,12 +228,11 @@
     },
     {
       "id": "export-all-declared-source-permissions",
-      "status": "implemented candidate; actual 45 ordinary and real E11 runtime chain pass; installed/final-head acceptance pending",
+      "status": "implemented and reviewed candidate; actual 45 ordinary and source/fresh-installed E11 chain pass; final all-head/rules/expected-head merge required",
       "baseCommit": "1f98aa10fcab61b01e3015fb94a026609c4926f2",
       "documentation": "docs/EXPORT_SOURCE_PERMISSIONS.md",
       "remaining": [
-        "candidate real PG/real E11/unchanged peer/final-head CI qualification",
-        "public installed runtime/source review/rules/expected-head merge",
+        "fresh final all-head CI/raw results, rules/ready-clean state and expected-head merge",
         "current-source status/final post-render permission checks and host-human/complete rights/lifecycle acceptance"
       ],
       "reproduction": {
@@ -258,7 +257,18 @@
         "cancelled": 0,
         "skips": 0
       },
-      "sourceReview": "clear for complete saved plus current-viewpoint external obligations, no truncation, strict decision literals, preserved review/standalone semantics, copied context/options and admission before cache; no final fence/current source truth claim"
+      "sourceReview": "clear for complete saved plus current-viewpoint external obligations, no truncation, strict decision literals, preserved review/standalone semantics, copied context/options and admission before cache; no final fence/current source truth claim",
+      "installedQualification": {
+        "source": "38e716be1f24df77599c29d53d8d1ebb2cb8d7a5",
+        "ordinaryJob": 134868457944,
+        "ordinaryTests": 45,
+        "realConsentJob": 134868458493,
+        "sourceTests": 1,
+        "freshInstalledPublicServeTests": 1,
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
     }
   ],
   "approvedDesignSha256": {
