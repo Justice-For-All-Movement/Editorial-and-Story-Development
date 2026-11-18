@@ -92,3 +92,35 @@ jobs:
         env:
           E11_DIR: ${{ github.workspace }}/.engines/consent
           TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
+
+  factual-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: fixture-only
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - uses: actions/checkout@v4
+        with:
+          repository: Justice-For-All-Movement/Factual-investigation-engine
+          ref: 232a339e0e4d6f1e90f06b7aa84b03e6386d0b3a
+          path: .engines/factual
+          persist-credentials: false
+      - run: npm ci
+        working-directory: .engines/factual
+      - run: npm run test:factual
+        env:
+          E08_DIR: ${{ github.workspace }}/.engines/factual
+          TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres

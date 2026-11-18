@@ -1,17 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtemp } from 'node:fs/promises';
+import { createServer } from 'node:http';
+import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import pg from 'pg';
 import { generateSigningKey, signAccessToken, withDisposableDatabase } from '../src/service-kit.ts';
-import { ADMIN, ALL_CAPS, CLAIM_CONTRACT, block, investigationPackage, needsPg, project } from './fixtures.ts';
+import { ADMIN, ALL_CAPS, CLAIM_CONTRACT, FINDING_CONTRACT, block, investigationPackage, needsPg, project } from './fixtures.ts';
 
 // End to end: the real `serve` entry in a child process, real PostgreSQL, signed tokens, plain fetch.
 test('HTTP end to end through the standalone server', needsPg, () => withDisposableDatabase(pg, ADMIN, async (url) => {
   const key = generateSigningKey('k1');
-  const child = spawn(process.execPath, ['src/engine/serve.ts'], { stdio: ['ignore', 'pipe', 'pipe'], env: { PATH: process.env.PATH ?? '', DATABASE_URL: url, PORT: '0', HOST: '127.0.0.1', IDENTITY_PUBLIC_KEYS: JSON.stringify({ k1: key.publicKeyPem }), IDENTITY_ISSUER: 'iap', EDITORIAL_STANDALONE: 'knowledge,consent', OBJECT_STORE_PATH: await mkdtemp(join(tmpdir(), 'e09-http-')) } });
+  // Controlled E08 HTTP stand-in, not real peer/authentication qualification.
+  const findingToken = `fixture.${Buffer.from(JSON.stringify({ tid: 't1', pid: 'p1', purpose: 'editorial', kind: 'service', cmp: [] })).toString('base64url')}.fixture`;
+  const findingRoot = await mkdtemp(join(tmpdir(), 'e09-finding-fixture-'));
+  const findingFile = join(findingRoot, 'token'); await writeFile(findingFile, findingToken, { mode: 0o600 });
+  let findingReads = 0;
+  const factual = createServer((req, res) => {
+    if (req.method !== 'GET' || req.url !== '/v1/records/finding/f-contract' || req.headers.authorization !== `Bearer ${findingToken}`) { res.statusCode = 404; res.end(); return; }
+    findingReads++; res.setHeader('content-type', 'application/json');
+    res.end(JSON.stringify({ ref: FINDING_CONTRACT, id: 'f-contract', kind: 'finding', revision: 3, state: 'approved', stale: false, blocked: false, data: { label: 'verified_fact', classification: 'established' } }));
+  });
+  await new Promise<void>(r => factual.listen(0, '127.0.0.1', r));
+  const factualAddress = factual.address() as { port: number };
+
+  const child = spawn(process.execPath, ['src/engine/serve.ts'], { stdio: ['ignore', 'pipe', 'pipe'], env: { PATH: process.env.PATH ?? '', FACTUAL_URL: `http://127.0.0.1:${factualAddress.port}`, FACTUAL_TOKEN_FILE: findingFile, DATABASE_URL: url, PORT: '0', HOST: '127.0.0.1', IDENTITY_PUBLIC_KEYS: JSON.stringify({ k1: key.publicKeyPem }), IDENTITY_ISSUER: 'iap', EDITORIAL_STANDALONE: 'knowledge,consent', OBJECT_STORE_PATH: await mkdtemp(join(tmpdir(), 'e09-http-')) } });
   let stderr = ''; child.stderr.on('data', (c) => { stderr += String(c); });
   try {
     const port = await new Promise<number>((resolve, reject) => {
@@ -76,7 +90,7 @@ test('HTTP end to end through the standalone server', needsPg, () => withDisposa
     assert.equal((await call('GET', '/v1/events', undefined, token('x', ['editorial:read', 'editorial:write']))).status, 403);
     // generator from a package, lyrics helper, search, audit
     const gen = await call('POST', '/v1/generate', { generator: 'narrative', editorialProjectId: p.json.id, package: investigationPackage() });
-    assert.equal(gen.status, 201); assert.equal(gen.json.document.body.docType, 'narrative'); assert.equal(gen.json.omitted.length, 2);
+    assert.equal(gen.status, 201); assert.ok(findingReads > 0, 'generation used explicit current finding fixture'); assert.equal(gen.json.document.body.docType, 'narrative'); assert.equal(gen.json.omitted.length, 2);
     assert.equal((await call('POST', '/v1/lyrics/analyze', { text: 'The council met at night\nand signed away the light', language: 'en' })).json.rhymeScheme, 'AA');
     assert.deepEqual((await call('POST', '/v1/lyrics/rhymes', { word: 'night', language: 'en', candidates: ['light', 'harbor'] })).json.map((s: { word: string }) => s.word), ['light']);
     assert.ok((await call('GET', '/v1/search?q=dredging')).json.length >= 1);
@@ -93,6 +107,7 @@ test('HTTP end to end through the standalone server', needsPg, () => withDisposa
     assert.equal((await call('GET', '/v1/nothing-here')).status, 404);
     assert.equal((await call('POST', '/v1/documents', [1, 2])).status, 400);
   } finally {
+    factual.closeAllConnections(); await new Promise<void>(r => factual.close(() => r()));
     child.kill('SIGTERM');
     await new Promise((r) => { child.once('exit', r); setTimeout(() => { child.kill('SIGKILL'); r(null); }, 5000); });
   }
