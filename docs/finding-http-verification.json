@@ -1,0 +1,29 @@
+{
+  "status": "implemented candidate; final-head CI and expected-head merge required",
+  "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/3",
+  "peerPin": "Justice-For-All-Movement/Factual-investigation-engine@232a339e0e4d6f1e90f06b7aa84b03e6386d0b3a",
+  "peerCi": {
+    "source": "49543b179a8d913cec89b5fd5369d6fe469ed416",
+    "ordinaryJob": 134814030760,
+    "ordinaryTests": 40,
+    "realFactualJob": 134814031243,
+    "realFactualTests": 1,
+    "allHeadChecks": "8 success",
+    "failures": 0,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "local": "16focused HTTP source groups/typecheck-build-registry;5packed finding groups/public types/5runtime bytes matched at prior source; final refresh pending; copied prepared deps, not fresh installation/full local suite/PG/live claim",
+  "review": "clear for exact detached current metadata, owning missing/changed-status denial, optional configuration, no rewritten source or saved history; strict owning exact-ref admission added for host ports",
+  "sha256": {
+    "src/engine/finding-http.ts": "43e80660fb711fdfc1c34ab867ac0b35a1b93c6e4ce79e597d8ebf787e022fef",
+    "src/engine/index.ts": "7016b17a824f1e1fbf55109a5d2b8768198642d1eb8039569cc586347672cb6b",
+    "src/engine/serve.ts": "e43b10db32d5c8ae3aade55eb95d06515a778c0f81ec837b2089e48a7f4d77f6",
+    "src/engine/ports.ts": "706b4c6ff60f6b2a285d294bb279498f0dd934e00d5ce3cf2a823a1d3a0d36da",
+    "tests/finding-http.test.ts": "660c2b7dc7814d9109a66f897bff318ee27e2ffdf01e8e436c3f785aa022d319",
+    "tests/engine.test.ts": "9c5f4f2783764ce08488c7d6544e8f5b6f40ee25fe4d43133f3f0785a42a6bb2",
+    "tests/engine-http.test.ts": "e1b22cde431849f0e8452e243af74b91dc4c076cca60570fe5406c8b702a61ad",
+    "integration/finding-http.test.ts": "64fe17ff0cb97075135a0182658943b0f9688bdb495599f31e949ded56b88ab2",
+    "docs/FINDING_HTTP.md": "b528903280d6e97a60a67b91643c02a74bb08971e8117a2efd0b7a1ef64b80ef"
+  }
+}

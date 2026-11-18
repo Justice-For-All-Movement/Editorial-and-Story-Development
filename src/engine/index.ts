@@ -170,7 +170,11 @@ export function createEngine(deps: EditorialDeps) {
   const isFact = pattern(cfg.factSourcePatterns ?? ['E07:claim*', 'E08:finding*']);
   const isTestimony = pattern(cfg.testimonySourcePatterns ?? ['E02:*', 'E05:*', 'E06:*', 'E07:testimony*']);
   const supported = cfg.supportedFactualValues ?? ['supported'];
-  const findingOk = (v: FindingStatus | null, ref: string): boolean => v !== null && v.ref === ref && v.state === 'approved' && v.label === 'verified_fact' && v.classification === 'established' && !v.stale && !v.blocked;
+  const exactFindingRef = (ref: string): boolean => {
+    const selected = /^E08:finding:[A-Za-z0-9][A-Za-z0-9._-]{0,127}@([1-9][0-9]{0,15})$/.exec(ref);
+    return selected !== null && Number.isSafeInteger(Number(selected[1]));
+  };
+  const findingOk = (v: FindingStatus | null, ref: string): boolean => v !== null && v.ref === ref && v.state === 'approved' && v.label === 'verified_fact' && v.classification === 'established' && v.stale === false && v.blocked === false;
   const claimOk = (s: ClaimStatus | null): boolean => s !== null && supported.includes(s.factual) && !s.stale && !s.blocked;
   const notice = (lang: string, key: 'satire' | 'campaign' | 'modelDisclosure'): string => cfg.notices?.[lang]?.[key] ?? cfg.notices?.[lang.split('-')[0] as string]?.[key]
     ?? { satire: 'Satire. This work is not a factual report.', campaign: 'Campaign material published by {identity}.', modelDisclosure: 'Machine-proposed draft text. It is not sourced and has not been verified.' }[key];
@@ -309,6 +313,7 @@ export function createEngine(deps: EditorialDeps) {
     for (const b of changed.filter(x => x.basis === 'verified_fact')) {
       const refs = b.sources.filter(ref => isFact(ref) && parseUref(ref).engine === 'E08');
       if (refs.length === 0) continue;
+      invariant(refs.every(exactFindingRef), 'unavailable', 'Exact positive E08 finding editions are required');
       invariant(ports.findings !== undefined, 'unavailable', 'A current Factual finding port is required for E08 verified_fact sources');
       const results = [];
       for (const ref of refs) results.push({ ref, status: await ports.findings.getFindingStatus(ctx, ref) });
@@ -806,6 +811,7 @@ export function createEngine(deps: EditorialDeps) {
           let current: FactStatement['sources'][number]['current'] = null;
           if (claim) { if (ports.knowledge === undefined) current = 'not_checked'; else { if (!cache.has(ref)) cache.set(ref, await ports.knowledge.getClaimStatus(ctx, ref)); current = cache.get(ref) ?? 'unknown_claim'; } }
           if (isFact(ref) && parseUref(ref).engine === 'E08') {
+            invariant(exactFindingRef(ref), 'unavailable', 'An exact positive E08 finding edition is required');
             if (ports.findings === undefined) current = 'not_checked';
             else { if (!findings.has(ref)) findings.set(ref, await ports.findings.getFindingStatus(ctx, ref)); current = findings.get(ref) ?? 'unknown_finding'; }
           }

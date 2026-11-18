@@ -191,15 +191,27 @@
     },
     {
       "id": "current-factual-finding-http",
-      "status": "incomplete WIP; authoring/fact-check wiring implemented, actual PG/E08 qualification pending",
+      "status": "implemented candidate; final-head CI and expected-head merge required",
       "baseCommit": "ee944d9986a760b54ad1443bf5350c55f090f507",
       "documentation": "docs/FINDING_HTTP.md",
       "localEvidence": "5focused synthetic local groups, typecheck/build pass; no full suite/installed/PG/live claim",
       "remaining": [
-        "actual PostgreSQL owning finding-guard test and actual pinned E08 integration",
-        "packed public exports/types/runtime and all final-head CI/source review",
-        "host current-human/all-source rights/render/browserAT acceptance"
-      ]
+        "final-head CI/package/source verification and expected-head merge",
+        "current-human/all-source rights/export-fencing/host PKI/lifecycle/browserAT qualification"
+      ],
+      "peerCi": {
+        "source": "49543b179a8d913cec89b5fd5369d6fe469ed416",
+        "ordinaryJob": 134814030760,
+        "ordinaryTests": 40,
+        "realFactualJob": 134814031243,
+        "realFactualTests": 1,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "verification": "docs/finding-http-verification.json",
+      "sourceReview": "clear for exact detached current metadata, owning missing/changed-status denial, optional configuration, no rewritten source or saved history; strict owning exact-ref admission added for host ports"
     }
   ],
   "approvedDesignSha256": {

@@ -277,3 +277,5 @@ Not implemented or not verified:
 - No independent security review has been performed.
 
 Private export replay rechecks current visibility, withdrawals/blocked flags, requested approval and fresh use decisions before the idempotency lookup. An authorized identical replay returns the original acknowledgement without repeated export effects; a denied replay retains history and withholds content. See `EXPORT_REPLAY_AUTHORITY.md` for regression and actual-engine evidence and sequential/host limits.
+
+Optional `FindingPort` / `httpFindingPort` reads current E08 finding metadata at the exact cited edition. Configure standalone `FACTUAL_URL` and `FACTUAL_TOKEN_FILE`; unchecked Knowledge standalone mode cannot bypass missing finding admission. Changed `verified_fact` blocks with E08 references require exact approved/verified_fact/established, nonstale/nonblocked metadata; this condition does not establish independent truth. Fact-check retains literal finding metadata and withholds the whole current report after edition changes. See `FINDING_HTTP.md` for owning/peer/package evidence and remaining host/current rights/export-fencing limits.

@@ -633,6 +633,7 @@ test('E08 findings cannot be empty-success verified facts and current metadata i
   await assert.rejects(doc(unsupported, [block('f', { sources: [ref] })]), fails('unavailable'));
   let value: import('../src/engine/ports.ts').FindingStatus = { ref, state: 'approved', label: 'verified_fact', classification: 'established', stale: false, blocked: false };
   const e = make(sql, { ports: { findings: { async getFindingStatus(_ctx, selected) { assert.equal(selected, ref); return { ...value }; } } } });
+  await assert.rejects(doc(e, [block('f', { sources: ['E08:finding:fiction'] })]), fails('unavailable'));
   const { id } = await doc(e, [block('f', { sources: [ref] })]);
   let ledger = await e.factCheck(ctx(), id);
   assert.equal(ledger.statements[0]!.status, 'supported');
