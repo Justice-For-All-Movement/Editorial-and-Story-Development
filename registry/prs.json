@@ -463,19 +463,28 @@
     },
     {
       "id": "export-final-visibility",
-      "status": "explicitly incomplete test-only WIP; no runtime implementation; actual baseline CI pending",
+      "status": "runtime candidate; local typecheck/build/registry pass; actual PG source-installed/current-head CI review merge pending",
       "baseCommit": "4387e05b7a33305509fba962ac7aae83c1635413",
       "regressionCommit": "655c669d7c7d89a80b9d6127affe4b2e350d65d6",
       "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/8",
       "documentation": "docs/EXPORT_FINAL_VISIBILITY.md",
       "local": "typecheck passed on prepared dependencies; no local PG/full or installed result",
       "remaining": [
-        "inspect actual four-case post-storage owning-PG baseline",
-        "implement coherent NEW and CACHED final own-visibility/complete-original-basis checks without replacing original private dependencies",
-        "preserve committed history/unknown outcomes and original replay ACK; no deletion/automatic retry",
-        "meaningful source/installed/upstream tests and review/current-head checks/rules/expected merge"
+        "actual seven owning-PG source/normal-installed and existing real upstream/full CI",
+        "source review/fresh head checks/rules/expected merge",
+        "final upstream rights/approvals/withdrawal/recursive source mapping and host human/lifecycle/unknown storage qualification"
       ],
-      "limits": "direct SQL compartment update is only an owning test fixture, not a host/admin API; no current human/complete rights/distributed-fence/SQL-filesystem atomicity claim"
+      "limits": "conservative ALL historical project credits visibility in final coherent own snapshot, bounded1024revisions/512KiB/1024collaborators/viewpoints; own snapshot not continuous auth/whole-source/distributed fencing; retain all history/unknown outputs",
+      "runtimeCommit": "54e21589a9055b637ef3b0dbd42fb84f0e00fd98",
+      "baseline": {
+        "ordinaryJob": 135126424377,
+        "tests": 61,
+        "passes": 57,
+        "failures": 4,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "verification": "docs/export-final-visibility-verification.json"
     }
   ],
   "approvedDesignSha256": {
