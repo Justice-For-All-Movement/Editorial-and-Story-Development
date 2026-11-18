@@ -40,7 +40,7 @@ Server: `npm run serve` (`node src/engine/serve.ts`). Environment: `DATABASE_URL
 (127.0.0.1), `IDENTITY_PUBLIC_KEYS` (JSON map kid→PEM) or `IDENTITY_JWKS_FILE` (file with the same map) — required,
 `IDENTITY_ISSUER`, `OBJECT_STORE` / `OBJECT_STORE_PATH` / `S3_*`, `EDITORIAL_STANDALONE` (comma list of `knowledge`,
 `consent`), `EDITORIAL_ALLOW_SELF_APPROVAL`, `EDITORIAL_CONFIG_FILE` (JSON with the `config` keys above),
-`KNOWLEDGE_URL` + `KNOWLEDGE_TOKEN_FILE`, `MODEL_ENDPOINT` + `MODEL_API_KEY_FILE`. The engine has no background jobs,
+`KNOWLEDGE_URL` + `KNOWLEDGE_TOKEN_FILE`, `CONSENT_URL` + `CONSENT_TOKEN_FILE`, `MODEL_ENDPOINT` + `MODEL_API_KEY_FILE`. The engine has no background jobs,
 so the server runs no worker loop. No external tools are used.
 
 ## 2. Model
@@ -262,8 +262,9 @@ end through the real `serve` entry in a child process.
 Not implemented or not verified:
 
 - `httpKnowledgePort` reads the actual E07 `GET /v1/claims/:id` dossier at the exact cited edition. It requires a service token bound to tenant/project/purpose, with compartments no broader than the caller snapshot. It maps the current assessment tracks and stale/blocked/withdrawal metadata; see `KNOWLEDGE_HTTP.md` for boundaries and current test evidence. The dedicated pinned-real-E07 CI job is required for acceptance. No live deployed E07 is qualified.
+- Optional `httpUseDecisionPort` evaluates real E11 `POST /v1/use-decisions` with the same bounded scope/compartment transport as Knowledge. It has no actual-use, dispatch or publishing endpoint and no retry/idempotency override. See `CONSENT_HTTP.md` for current peer-CI evidence and limits.
 - `httpModelPort` retains its generic JSON contract and is not verified against a live model provider.
-- A dedicated E07 HTTP integration test is now present; its actual CI result is recorded in `KNOWLEDGE_HTTP.md`. Integration with E08, E10, E11 and E12 remains unqualified; the package
+- A dedicated E07 HTTP integration test is now present; its actual CI result is recorded in `KNOWLEDGE_HTTP.md`. A dedicated real E11/separate-E09-database/standalone-server test now exercises grant, withdrawal and denial; current CI evidence is in `CONSENT_HTTP.md`. Integration with E08, E10 and E12 remains unqualified; the package
   fixture copies E08's shape by hand.
 - Lyrics: syllables and rhymes come from spelling rules, not a pronouncing dictionary. Irregular words can be miscounted,
   stress and true metrical feet are not analysed, and rhyme candidates must be supplied (caller, document text or lexicon).

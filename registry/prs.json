@@ -101,16 +101,29 @@
     },
     {
       "id": "real-consent-http",
-      "status": "incomplete WIP; integration and qualification pending",
+      "status": "incomplete WIP; final-head CI required",
       "baseCommit": "d1e6b0d569f03f7ee43af5f64622b20ec923b01e",
       "documentation": "docs/CONSENT_HTTP.md",
-      "localEvidence": "5 Consent +6 preserved Knowledge local groups pass, zero failures/skips; typecheck/build separate",
+      "localEvidence": "11 focused +11 packed exports +4 preserved lyric/HTTP groups/typecheck/build/registry/strict declarations/4runtime bytes match; zero failures/skips; copied prepared deps, not fresh installation/full local suite",
       "remaining": [
         "real pinned E11 and separate owning Editorial database integration",
         "package/source review and all final-head CI",
         "original human/current all-source rights and output/browser/host acceptance"
       ],
-      "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/2"
+      "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/2",
+      "verification": "docs/consent-http-verification.json",
+      "initialCi": {
+        "source": "6c0c12a33dc3b159d9bb4d89f1d1ca2a73a2cea0",
+        "ordinaryJob": 134752972538,
+        "ordinaryTests": 32,
+        "realConsentJob": 134752972427,
+        "realConsentTests": 1,
+        "realKnowledgeJob": 134752972413,
+        "realKnowledgeTests": 1,
+        "failures": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear for scoped evaluation; cached exports/current downstream authority are separate"
     }
   ],
   "approvedDesignSha256": {

@@ -1,0 +1,50 @@
+{
+  "status": "incomplete WIP; final-head CI required",
+  "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/2",
+  "peerPin": "Justice-For-All-Movement/Consent-rights-and-use-decisions-engine@be8bf8cdaf333b5278027663eeffaf4a36b6f08a",
+  "local": {
+    "focused": 11,
+    "packedPublicExports": 11,
+    "preservedLyricHttp": 4,
+    "typecheck": true,
+    "build": true,
+    "registry": true,
+    "strictDeclarations": true,
+    "runtimeBytes": [
+      "dist/engine/consent-http.js",
+      "dist/engine/scoped-http.js",
+      "dist/engine/knowledge-http.js",
+      "dist/engine/serve.js"
+    ],
+    "failures": 0,
+    "skips": 0
+  },
+  "initialCi": {
+    "source": "6c0c12a33dc3b159d9bb4d89f1d1ca2a73a2cea0",
+    "ordinaryJob": 134752972538,
+    "ordinaryTests": 32,
+    "realConsentJob": 134752972427,
+    "realConsentTests": 1,
+    "realKnowledgeJob": 134752972413,
+    "realKnowledgeTests": 1,
+    "failures": 0,
+    "skips": 0
+  },
+  "review": "Clear for scoped fresh decision evaluation, captured exact request before credential work, no override/idempotency/retry, literal deny/review preservation, bounded shared transport and standalone configured-port precedence. Existing Knowledge tests retained; vendor kit/contracts and dependencies/schema unchanged.",
+  "limits": [
+    "service credential is not original-human delegation/current Identity/rights proof; E11 verifies signatures",
+    "remote decision/audit may commit on lost acknowledgement; unavailable is not rollback or stopped proof",
+    "no actual-use recording, publication/send/payment/provider operations",
+    "copied prepared dependencies, not fresh installation/full local suite/local PostgreSQL/TLS/browser/AT acceptance",
+    "cached export and broader workflow acceptance remain separate; PAM stopped at foundation"
+  ],
+  "sha256": {
+    "src/engine/consent-http.ts": "c207b4f7c1e5ad532a214c2e559a3c490da933f602aadee8f0428faa50740c79",
+    "src/engine/scoped-http.ts": "df0cf823428e1c52dffe00f1c6a505ba3f9d9f9671f276c121354387dded1d34",
+    "src/engine/knowledge-http.ts": "a01d55ce836fad37e8879d94e36216f3ed3b2f11864b402a4b69b65f8307d753",
+    "src/engine/serve.ts": "7885eba35d25c49a07631105808a4f4917ded513ed96046de3e4f42ce45bfd5b",
+    "tests/consent-http.test.ts": "52a1317f60b8ec81be70f002ee1bee201a7c84848c45b020b7708234aa91d5d9",
+    "integration/consent-http.test.ts": "8636199d621e3aa7201dd8746a627555cd065a2445a159af8c286902ea4e14a2",
+    "docs/CONSENT_HTTP.md": "2d6f0e8e808b4651ab3cc5559a0e41bc26ec5bc402616d7b9dda62d8a8c1a0e1"
+  }
+}
