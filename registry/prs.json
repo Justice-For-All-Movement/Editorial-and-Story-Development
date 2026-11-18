@@ -463,14 +463,14 @@
     },
     {
       "id": "export-final-visibility",
-      "status": "runtime candidate; local typecheck/build/registry pass; actual PG source-installed/current-head CI review merge pending",
+      "status": "reviewed qualified runtime; final documentation-head CI/rules/expected-head merge pending",
       "baseCommit": "4387e05b7a33305509fba962ac7aae83c1635413",
       "regressionCommit": "655c669d7c7d89a80b9d6127affe4b2e350d65d6",
       "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/8",
       "documentation": "docs/EXPORT_FINAL_VISIBILITY.md",
       "local": "typecheck passed on prepared dependencies; no local PG/full or installed result",
       "remaining": [
-        "actual seven owning-PG source/normal-installed and existing real upstream/full CI",
+        "fresh final documentation-head full/peer checks/rules/expected merge",
         "source review/fresh head checks/rules/expected merge",
         "final upstream rights/approvals/withdrawal/recursive source mapping and host human/lifecycle/unknown storage qualification"
       ],
@@ -484,7 +484,24 @@
         "cancelled": 0,
         "skips": 0
       },
-      "verification": "docs/export-final-visibility-verification.json"
+      "verification": "docs/export-final-visibility-verification.json",
+      "qualifiedRuntimeCommit": "e36d3711b71186388ca40dd84d50fa9afffae91c",
+      "qualifiedCi": {
+        "ordinaryJob": 135164805935,
+        "ordinaryTests": 64,
+        "consentAndAuthorityJob": 135164774787,
+        "focusedSourceTests": 14,
+        "focusedFreshInstalledPublicEngineTests": 14,
+        "actualE11SourceTests": 1,
+        "actualE11FreshInstalledPublicServeTests": 1,
+        "knowledgeJob": 135164806423,
+        "factualJob": 135164806695,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear for final coherent read-only own visibility, bounded ALL historical contributors and original effects; conservative denial and no whole-source/current-human/fence claims explicit"
     }
   ],
   "approvedDesignSha256": {
