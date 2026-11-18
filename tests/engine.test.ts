@@ -601,3 +601,25 @@ test('tenant, project and compartment isolation', needsPg, () => db(async (sql) 
   const { verifyAuditChain, listAudit } = await import('../src/service-kit.ts');
   assert.ok(verifyAuditChain(await listAudit(sql, 'e09_editorial', ctx(), { allProjects: true, limit: 1000 })));
 }));
+
+test('cached private export cannot bypass freshly denied Consent and never emits a second export', needsPg, () => db(async sql => {
+  const u = useDecisions(); const e = make(sql, { ports: { knowledge: knowledge(), useDecisions: u } });
+  const { id } = await doc(e, [block('t', { basis: 'attributed_testimony', attribution: 'Fictional participant', sources: [SEGMENT_INTERVIEW] })]);
+  const options = { idempotencyKey: 'cached-export-current-consent' };
+  const original = await e.exportDocument(ctx(), id, 1, options);
+  u.deny.add(SEGMENT_INTERVIEW);
+  await assert.rejects(e.exportDocument(ctx(), id, 1, options), fails('consent_denied'));
+  const retained = await e.listExports(ctx(), id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
+  assert.equal((await events(e, ctx(), 'editorial.exported')).length, 1);
+}));
+
+test('cached private export cannot bypass current document compartment visibility', needsPg, () => db(async sql => {
+  const e = make(sql); const admitted = ctx({ compartments: ['vault'] });
+  const p = await e.create(admitted, 'editorial_project', { body: project() });
+  const d = await e.create(admitted, 'document', { compartment: 'vault', body: { title: 'Fictional private document', editorialProjectId: p.id, docType: 'article', language: 'en',
+    blocks: [block('i', { basis: 'invention', sources: [], disclosure: 'Fictional invented scene.' })] } });
+  const options = { idempotencyKey: 'cached-export-current-compartment' };
+  const original = await e.exportDocument(admitted, d.id, 1, options);
+  await assert.rejects(e.exportDocument(ctx(), d.id, 1, options), fails('not_found'));
+  const retained = await e.listExports(admitted, d.id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
+}));

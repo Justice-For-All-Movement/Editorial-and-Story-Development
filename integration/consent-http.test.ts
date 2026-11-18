@@ -71,11 +71,15 @@ test('standalone Editorial uses real Consent HTTP and denies an old private draf
             blocks: [block('t', { basis: 'attributed_testimony', attribution: 'Fictional participant', sources: [subject] })] } });
           assert.equal(draft.status, 201, JSON.stringify(draft.json));
           assert.equal(draft.json.body.blocks[0].verification.useDecision.decision, 'allow');
+          const exportInput = { revision: 1, idempotencyKey: 'private-export-before-withdrawal' };
+          const originalExport = await send('POST', `/v1/documents/${draft.json.id}/exports`, exportInput); assert.equal(originalExport.status, 201);
           await sendConsent(`/v1/permissions/${permission.id}/withdraw`, { reason: 'Fictional withdrawal fixture' });
           assert.equal((await port.decide(ctx(), { subjects: [subject], action: 'adapt', purpose: 'editorial' })).decision, 'deny');
+          const replay = await send('POST', `/v1/documents/${draft.json.id}/exports`, exportInput);
+          assert.equal(replay.status, 403, 'historical cached export must not disclose revoked material'); assert.equal(replay.json.error.code, 'consent_denied');
           const denied = await send('POST', `/v1/documents/${draft.json.id}/exports`, { revision: 1 });
           assert.equal(denied.status, 403); assert.equal(denied.json.error.code, 'consent_denied');
-          const exports = await send('GET', `/v1/documents/${draft.json.id}/exports`); assert.deepEqual(exports.json, []);
+          const exports = await send('GET', `/v1/documents/${draft.json.id}/exports`); assert.equal(exports.json.length, 1); assert.equal(exports.json[0].exportId, originalExport.json.manifest.exportId);
           const retained = await send('GET', `/v1/documents/${draft.json.id}`); assert.equal(retained.json.digest, draft.json.digest);
           assert.equal(retained.json.body.blocks[0].text, draft.json.body.blocks[0].text);
           assert.equal((await send('POST', '/v1/documents', { body: { ...draft.json.body, title: 'Must remain denied' } })).status, 403);
