@@ -228,7 +228,7 @@
     },
     {
       "id": "export-all-declared-source-permissions",
-      "status": "implemented candidate; actual baseline 40pass/2fail reproduced; final runtime/peer/package/CI/review pending",
+      "status": "implemented candidate; actual 45 ordinary and real E11 runtime chain pass; installed/final-head acceptance pending",
       "baseCommit": "1f98aa10fcab61b01e3015fb94a026609c4926f2",
       "documentation": "docs/EXPORT_SOURCE_PERMISSIONS.md",
       "remaining": [
@@ -245,8 +245,20 @@
         "cancelled": 0,
         "skips": 0
       },
-      "localEvidence": "typecheck/build/original-registry pass; copied prepared dependencies, no local PG/full suite/installed claim",
-      "verification": "docs/export-source-verification.json"
+      "localEvidence": "16 focused synthetic collaborator groups, typecheck/build/original-registry pass; copied prepared dependencies, no local PG/full ordinary/installed claim",
+      "verification": "docs/export-source-verification.json",
+      "runtimeCi": {
+        "source": "908d76089ea6ae2600f91d0dc4270f568808d5df",
+        "ordinaryJob": 134866905870,
+        "ordinaryTests": 45,
+        "realConsentJob": 134866905652,
+        "realConsentTests": 1,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear for complete saved plus current-viewpoint external obligations, no truncation, strict decision literals, preserved review/standalone semantics, copied context/options and admission before cache; no final fence/current source truth claim"
     }
   ],
   "approvedDesignSha256": {

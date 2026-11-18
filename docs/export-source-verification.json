@@ -11,7 +11,7 @@
     "cancelled": 0,
     "skips": 0
   },
-  "localEvidence": "typecheck/build/original-registry pass; copied prepared dependencies, no local PG/full suite/installed claim",
+  "localEvidence": "16 focused synthetic collaborator groups, typecheck/build/original-registry pass; copied prepared dependencies, no local PG/full ordinary/installed claim",
   "limits": [
     "candidate real PG/real E11/unchanged peer/final-head CI qualification",
     "public installed runtime/source review/rules/expected-head merge",
@@ -20,8 +20,21 @@
   "sha256": {
     "src/engine/index.ts": "3d9561d0121e03e0312fd9668d5b0e05b61021449dfd734b69a9bfc25f119d95",
     "tests/engine.test.ts": "ce1b41169e8e1ed2647fe760f4aa5ec1cca235eaa3e1d58cd8e7c135e2b4d2c0",
-    "integration/consent-http.test.ts": "5e5cb4435146de0589c389c2c2e9dd2c23955628838662b29ccccb52df1abfc4",
-    "docs/EXPORT_SOURCE_PERMISSIONS.md": "e082ba1a45bba52822db478dbf0ed618ff726f214834ec2714e7fffb83b79bda",
-    "docs/ENGINE_API.md": "c72d15d6dcd7eedc2b0433fa8e768a7412908db8468910c8b3d5302c553d1217"
-  }
+    "integration/consent-http.test.ts": "455cf74bb2777f19a1c511c13d9d32685224c282e326bbac0db5b85d3e4039a1",
+    "docs/EXPORT_SOURCE_PERMISSIONS.md": "371685897068710607980fbdba289f6bab597af3264f53eb143847ec13636f89",
+    "docs/ENGINE_API.md": "8042841768fcf3e3061a92fe8684330f512ec7eb028bacd5c6e86d8ea1ccee24",
+    ".github/workflows/ci.yml": "a21ec746842fed4a0fd7aa01609402dc2540e1fe25524be3b18c90511427de65"
+  },
+  "runtimeCi": {
+    "source": "908d76089ea6ae2600f91d0dc4270f568808d5df",
+    "ordinaryJob": 134866905870,
+    "ordinaryTests": 45,
+    "realConsentJob": 134866905652,
+    "realConsentTests": 1,
+    "allHeadChecks": "8 success",
+    "failures": 0,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "sourceReview": "clear for complete saved plus current-viewpoint external obligations, no truncation, strict decision literals, preserved review/standalone semantics, copied context/options and admission before cache; no final fence/current source truth claim"
 }

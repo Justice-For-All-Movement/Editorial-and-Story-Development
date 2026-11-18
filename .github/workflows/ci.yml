@@ -93,6 +93,21 @@ jobs:
           E11_DIR: ${{ github.workspace }}/.engines/consent
           TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
 
+      - name: Build and normally install private package for actual E11 export chain
+        run: |
+          npm run build
+          artifact=$(npm pack --pack-destination "$RUNNER_TEMP" --json | node -e 'let s="";process.stdin.on("data",c=>s+=c);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s)[0].filename));')
+          mkdir -p "$RUNNER_TEMP/editorial-export-consumer"
+          cd "$RUNNER_TEMP/editorial-export-consumer"
+          npm init -y
+          npm install "$RUNNER_TEMP/$artifact"
+      - name: Run the same E11 chain through installed public serve export
+        run: npm run test:consent
+        env:
+          E11_DIR: ${{ github.workspace }}/.engines/consent
+          TEST_DATABASE_URL: postgresql://postgres:fixture-only@127.0.0.1:5432/postgres
+          EDITORIAL_PACKAGE_ROOT: ${{ runner.temp }}/editorial-export-consumer
+
   factual-http:
     runs-on: ubuntu-latest
     timeout-minutes: 15

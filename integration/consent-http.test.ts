@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { once } from 'node:events';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -49,7 +50,9 @@ test('standalone Editorial uses real Consent HTTP and denies an old private draf
       await withDisposableDatabase(pg, admin, async (editorialUrl) => {
         const folder = await mkdtemp(join(tmpdir(), 'editorial-consent-'));
         const file = join(folder, 'service-token'); await writeFile(file, service, { mode: 0o600 });
-        const child = spawn(process.execPath, ['src/engine/serve.ts'], { stdio: ['ignore', 'pipe', 'pipe'], env: {
+        const entry = process.env.EDITORIAL_PACKAGE_ROOT === undefined ? 'src/engine/serve.ts'
+          : createRequire(resolve(process.env.EDITORIAL_PACKAGE_ROOT, 'package.json')).resolve('@accountability/editorial-story/serve');
+        const child = spawn(process.execPath, [entry], { stdio: ['ignore', 'pipe', 'pipe'], env: {
           PATH: process.env.PATH ?? '', DATABASE_URL: editorialUrl, PORT: '0', HOST: '127.0.0.1',
           IDENTITY_PUBLIC_KEYS: JSON.stringify({ fixture: key.publicKeyPem }), IDENTITY_ISSUER: 'iap',
           CONSENT_URL: consentBase, CONSENT_TOKEN_FILE: file, EDITORIAL_STANDALONE: 'consent', OBJECT_STORE_PATH: join(folder, 'objects'),

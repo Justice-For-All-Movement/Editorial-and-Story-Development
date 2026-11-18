@@ -264,14 +264,14 @@ Not implemented or not verified:
 - `httpKnowledgePort` reads the actual E07 `GET /v1/claims/:id` dossier at the exact cited edition. It requires a service token bound to tenant/project/purpose, with compartments no broader than the caller snapshot. It maps the current assessment tracks and stale/blocked/withdrawal metadata; see `KNOWLEDGE_HTTP.md` for boundaries and current test evidence. The dedicated pinned-real-E07 CI job is required for acceptance. No live deployed E07 is qualified.
 - Optional `httpUseDecisionPort` evaluates real E11 `POST /v1/use-decisions` with the same bounded scope/compartment transport as Knowledge. It has no actual-use, dispatch or publishing endpoint and no retry/idempotency override. See `CONSENT_HTTP.md` for current peer-CI evidence and limits.
 - `httpModelPort` retains its generic JSON contract and is not verified against a live model provider.
-- A dedicated E07 HTTP integration test is now present; its actual CI result is recorded in `KNOWLEDGE_HTTP.md`. A dedicated real E11/separate-E09-database/standalone-server test now exercises grant, withdrawal and denial; current CI evidence is in `CONSENT_HTTP.md`. Integration with E08, E10 and E12 remains unqualified; the package
+- A dedicated E07 HTTP integration test is now present; its actual CI result is recorded in `KNOWLEDGE_HTTP.md`. A dedicated real E11/separate-E09-database/standalone-server test now exercises grant, withdrawal and denial; current CI evidence is in `CONSENT_HTTP.md`. The pinned actual E08 finding path is qualified in FINDING_HTTP.md; broader workflow integration with E10 and E12 remains unqualified; the package
   fixture copies E08's shape by hand.
 - Lyrics: syllables and rhymes come from spelling rules, not a pronouncing dictionary. Irregular words can be miscounted,
   stress and true metrical feet are not analysed, and rhyme candidates must be supplied (caller, document text or lexicon).
 - Fountain output follows Fountain conventions but has not been checked with a third-party Fountain parser.
 - No rich-text formatting inside blocks, no real-time co-editing or presence, no merge of conflicting edits (the second
   writer reloads), no block-level locking, no notification delivery for assignments.
-- E08 finding refs on `verified_fact` blocks are not status-checked through a port; staleness arrives through `applyUpstreamChange`.
+- Current E08 finding metadata is checked for changed verified_fact blocks and fact-check via the accepted FindingPort; export-time current-source status and final permission checks remain separate. Staleness events do not replace those checks.
 - Search is a case-insensitive substring match over titles and block text, without ranking or stemming.
 - A viewpoint or asset revision flags its users stale; it does not re-run use decisions on them.
 - No independent security review has been performed.
