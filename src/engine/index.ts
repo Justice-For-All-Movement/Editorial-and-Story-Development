@@ -170,7 +170,7 @@ export function createEngine(deps: EditorialDeps) {
   const isFact = pattern(cfg.factSourcePatterns ?? ['E07:claim*', 'E08:finding*']);
   const isTestimony = pattern(cfg.testimonySourcePatterns ?? ['E02:*', 'E05:*', 'E06:*', 'E07:testimony*']);
   const supported = cfg.supportedFactualValues ?? ['supported'];
-  const findingOk = (v: FindingStatus | null): boolean => v !== null && v.state === 'approved' && v.label === 'verified_fact' && v.classification === 'established' && !v.stale && !v.blocked;
+  const findingOk = (v: FindingStatus | null, ref: string): boolean => v !== null && v.ref === ref && v.state === 'approved' && v.label === 'verified_fact' && v.classification === 'established' && !v.stale && !v.blocked;
   const claimOk = (s: ClaimStatus | null): boolean => s !== null && supported.includes(s.factual) && !s.stale && !s.blocked;
   const notice = (lang: string, key: 'satire' | 'campaign' | 'modelDisclosure'): string => cfg.notices?.[lang]?.[key] ?? cfg.notices?.[lang.split('-')[0] as string]?.[key]
     ?? { satire: 'Satire. This work is not a factual report.', campaign: 'Campaign material published by {identity}.', modelDisclosure: 'Machine-proposed draft text. It is not sourced and has not been verified.' }[key];
@@ -312,7 +312,7 @@ export function createEngine(deps: EditorialDeps) {
       invariant(ports.findings !== undefined, 'unavailable', 'A current Factual finding port is required for E08 verified_fact sources');
       const results = [];
       for (const ref of refs) results.push({ ref, status: await ports.findings.getFindingStatus(ctx, ref) });
-      const bad = results.filter(r => !findingOk(r.status));
+      const bad = results.filter(r => !findingOk(r.status, r.ref));
       if (bad.length > 0) {
         if (o.unsupportedFacts !== 'downgrade') throw new DomainError('invalid_basis', `block ${b.id}: E08 finding metadata does not currently support this verified_fact label`);
         const to = o.downgradeTo ?? 'allegation';
@@ -327,6 +327,7 @@ export function createEngine(deps: EditorialDeps) {
     const statusCache = new Map<string, ClaimStatus | null>();
     for (const b of changed.filter((x) => x.basis === 'verified_fact')) {
       const claimRefs = b.sources.filter((s) => parseUref(s).engine === 'E07' && isFact(s));
+      if (claimRefs.length === 0 && b.sources.some(ref => isFact(ref) && parseUref(ref).engine === 'E08')) continue;
       if (ports.knowledge === undefined) {
         if (cfg.standalone?.knowledge !== true) throw new DomainError('unavailable', 'A knowledge service (KnowledgePort) is required to label a block verified_fact; none is configured');
         b.verification = { ...(b.verification ?? {}), knowledge: { mode: 'standalone', status: 'not_checked' }, checkedAt: ctx.now };
@@ -813,7 +814,7 @@ export function createEngine(deps: EditorialDeps) {
         const mine = flags.filter((f) => f.blockId === b.id);
         const claims = sources.filter((s) => s.current !== null);
         const status: FactStatement['status'] = mine.length > 0 ? 'attention'
-          : b.basis === 'verified_fact' ? (claims.some((s) => s.current === 'unknown_claim' || s.current === 'unknown_finding' || (typeof s.current === 'object' && s.current !== null && !('classification' in s.current ? findingOk(s.current) : claimOk(s.current)))) ? 'attention' : claims.length === 0 || claims.some(s => s.current === 'not_checked') ? 'not_checked' : 'supported')
+          : b.basis === 'verified_fact' ? (claims.some((s) => s.current === 'unknown_claim' || s.current === 'unknown_finding' || (typeof s.current === 'object' && s.current !== null && !('classification' in s.current ? findingOk(s.current, s.ref) : claimOk(s.current)))) ? 'attention' : claims.length === 0 || claims.some(s => s.current === 'not_checked') ? 'not_checked' : 'supported')
           : b.sources.length === 0 ? 'unsourced' : 'sourced';
         statements.push({ blockId: b.id, ref: blockRef(documentId, b.id, l.r.revision), type: b.type, basis: b.basis, text: b.text, attribution: b.attribution ?? null, uncertainty: b.note ?? null, status, sources, saved: (b.verification ?? null) as Json | null, flags: mine });
       }

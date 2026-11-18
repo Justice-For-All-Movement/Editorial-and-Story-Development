@@ -632,12 +632,12 @@ test('E08 findings cannot be empty-success verified facts and current metadata i
   const unsupported = make(sql, { ports: { knowledge: k } });
   await assert.rejects(doc(unsupported, [block('f', { sources: [ref] })]), fails('unavailable'));
   let value: import('../src/engine/ports.ts').FindingStatus = { ref, state: 'approved', label: 'verified_fact', classification: 'established', stale: false, blocked: false };
-  const e = make(sql, { ports: { knowledge: k, findings: { async getFindingStatus(_ctx, selected) { assert.equal(selected, ref); return { ...value }; } } } });
+  const e = make(sql, { ports: { findings: { async getFindingStatus(_ctx, selected) { assert.equal(selected, ref); return { ...value }; } } } });
   const { id } = await doc(e, [block('f', { sources: [ref] })]);
   let ledger = await e.factCheck(ctx(), id);
   assert.equal(ledger.statements[0]!.status, 'supported');
   assert.deepEqual(ledger.statements[0]!.sources[0]!.current, value);
-  for (const patch of [{ state: 'withdrawn' as const }, { stale: true }, { blocked: true }, { classification: 'disputed' as const }, { label: 'allegation' as const }]) {
+  for (const patch of [{ ref: 'E08:finding:other@1' }, { state: 'withdrawn' as const }, { stale: true }, { blocked: true }, { classification: 'disputed' as const }, { label: 'allegation' as const }]) {
     const original = value; value = { ...value, ...patch };
     await assert.rejects(doc(e, [block('f', { sources: [ref] })]), fails('invalid_basis'));
     ledger = await e.factCheck(ctx(), id); assert.equal(ledger.statements[0]!.status, 'attention');
