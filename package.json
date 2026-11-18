@@ -4,22 +4,50 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./contracts": { "types": "./dist/contracts.d.ts", "default": "./dist/contracts.js" },
-    "./service-kit": { "types": "./dist/service-kit.d.ts", "default": "./dist/service-kit.js" },
-    "./engine": { "types": "./dist/engine/index.d.ts", "default": "./dist/engine/index.js" },
-    "./serve": { "types": "./dist/engine/serve.d.ts", "default": "./dist/engine/serve.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts.d.ts",
+      "default": "./dist/contracts.js"
+    },
+    "./service-kit": {
+      "types": "./dist/service-kit.d.ts",
+      "default": "./dist/service-kit.js"
+    },
+    "./engine": {
+      "types": "./dist/engine/index.d.ts",
+      "default": "./dist/engine/index.js"
+    },
+    "./serve": {
+      "types": "./dist/engine/serve.d.ts",
+      "default": "./dist/engine/serve.js"
+    }
   },
-  "engines": { "node": ">=24 <25" },
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/*.test.ts",
     "build": "tsc -p tsconfig.build.json",
-    "check": "npm run typecheck && npm test && npm run build",
+    "check": "npm run typecheck && npm test && npm run build && node scripts/validate-registry.mjs",
     "prepare": "npm run build",
-    "serve": "node src/engine/serve.ts"
+    "serve": "node src/engine/serve.ts",
+    "test:knowledge": "node --test integration/knowledge-http.test.ts"
   },
-  "dependencies": { "pg": "8.23.1" },
-  "devDependencies": { "@types/node": "26.6.5", "@types/pg": "8.23.1", "typescript": "7.0.2" },
-  "files": ["dist", "README.md", "docs"]
+  "dependencies": {
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "@types/pg": "8.23.1",
+    "typescript": "7.0.2"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "docs"
+  ]
 }

@@ -37,23 +37,4 @@ export function httpModelPort(options: { endpoint: string; apiKey?: string; time
     },
   };
 }
-/**
- * HTTP knowledge adapter: POST `<baseUrl>/v1/claims/status` with `{ ref }` → ClaimStatus, 404 → null.
- * The route is this adapter's own convention; the integrator normally supplies a KnowledgePort directly.
- * Implemented, not verified against a live E07.
- */
-export function httpKnowledgePort(options: { baseUrl: string; token?: string; timeoutMs?: number }): KnowledgePort {
-  const url = new URL('/v1/claims/status', options.baseUrl).toString();
-  return {
-    async getClaimStatus(_ctx, ref) {
-      let response: Response;
-      try { response = await fetch(url, { method: 'POST', redirect: 'error', signal: AbortSignal.timeout(options.timeoutMs ?? 15_000), headers: { 'content-type': 'application/json', ...(options.token === undefined ? {} : { authorization: `Bearer ${options.token}` }) }, body: JSON.stringify({ ref }) }); }
-      catch { throw new DomainError('unavailable', 'The knowledge service could not be reached'); }
-      if (response.status === 404) return null;
-      if (!response.ok) throw new DomainError('unavailable', `The knowledge service answered HTTP ${response.status}`);
-      const o = await response.json().catch(() => null) as Record<string, unknown> | null;
-      if (o === null || typeof o.factual !== 'string') throw new DomainError('unavailable', 'The knowledge service returned a malformed status');
-      return { factual: o.factual, editorial: typeof o.editorial === 'string' ? o.editorial : 'not_reviewed', stale: o.stale === true, blocked: o.blocked === true };
-    },
-  };
-}
+export { httpKnowledgePort } from './knowledge-http.ts';
