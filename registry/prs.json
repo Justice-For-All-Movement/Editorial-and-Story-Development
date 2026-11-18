@@ -101,13 +101,13 @@
     },
     {
       "id": "real-consent-http",
-      "status": "incomplete WIP; final-head CI required",
+      "status": "implemented and qualified candidate; final documentation-head CI/merge required",
       "baseCommit": "d1e6b0d569f03f7ee43af5f64622b20ec923b01e",
       "documentation": "docs/CONSENT_HTTP.md",
-      "localEvidence": "11 focused +11 packed exports +4 preserved lyric/HTTP groups/typecheck/build/registry/strict declarations/4runtime bytes match; zero failures/skips; copied prepared deps, not fresh installation/full local suite",
+      "localEvidence": "11focused+11packed public-export groups;4preserved lyric/HTTP;typecheck/build/registry/strict declarations;5runtime bytes match;0fail/cancel/skip;copied prepared deps, not fresh install/full local PostgreSQL suite",
       "remaining": [
-        "final-head CI/source/package qualification",
-        "original human/current all-source rights and output/browser/host acceptance"
+        "final documentation-head CI and expected-head merge",
+        "host current Identity/all-source rights, source services and broader creative workflow/quality acceptance"
       ],
       "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/2",
       "verification": "docs/consent-http-verification.json",
@@ -122,16 +122,28 @@
         "failures": 0,
         "skips": 0
       },
-      "sourceReview": "Scoped evaluation and cached export authority correction in the same PR; final qualification pending"
+      "sourceReview": "clear for scoped decision evaluation and fresh authority before cached private export disclosure; original fingerprint/effects/history preserved",
+      "fixedCi": {
+        "source": "ef0c6dbb5a61f655fc988ff8914a72fba3bbd007",
+        "ordinaryJob": 134758309683,
+        "ordinaryTests": 34,
+        "realConsentJob": 134758309629,
+        "realConsentTests": 1,
+        "realKnowledgeJob": 134758309159,
+        "realKnowledgeTests": 1,
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
     },
     {
       "id": "export-replay-current-authority",
-      "status": "runtime guard implemented; final-head qualification pending",
+      "status": "implemented and qualified candidate; final documentation-head CI/merge required",
       "documentation": "docs/EXPORT_REPLAY_AUTHORITY.md",
       "dependsOn": "real-consent-http PR2",
       "remaining": [
-        "final-head source/package/CI qualification",
-        "host/current Identity/all-source/distributed boundary remains separate"
+        "final documentation-head CI and expected-head merge",
+        "host current Identity/all-source rights, source services and broader creative workflow/quality acceptance"
       ],
       "reproduction": {
         "source": "7cb99b30c070cf0898ab849144f8ec8ad195a036",
@@ -140,7 +152,20 @@
         "expectedRegressionFailures": 2,
         "realConsentJob": 134756131570,
         "expectedRegressionFailuresRealConsent": 1
-      }
+      },
+      "fixedCi": {
+        "source": "ef0c6dbb5a61f655fc988ff8914a72fba3bbd007",
+        "ordinaryJob": 134758309683,
+        "ordinaryTests": 34,
+        "realConsentJob": 134758309629,
+        "realConsentTests": 1,
+        "realKnowledgeJob": 134758309159,
+        "realKnowledgeTests": 1,
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear for scoped decision evaluation and fresh authority before cached private export disclosure; original fingerprint/effects/history preserved"
     }
   ],
   "approvedDesignSha256": {

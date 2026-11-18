@@ -275,3 +275,5 @@ Not implemented or not verified:
 - Search is a case-insensitive substring match over titles and block text, without ranking or stemming.
 - A viewpoint or asset revision flags its users stale; it does not re-run use decisions on them.
 - No independent security review has been performed.
+
+Private export replay rechecks current visibility, withdrawals/blocked flags, requested approval and fresh use decisions before the idempotency lookup. An authorized identical replay returns the original acknowledgement without repeated export effects; a denied replay retains history and withholds content. See `EXPORT_REPLAY_AUTHORITY.md` for regression and actual-engine evidence and sequential/host limits.
