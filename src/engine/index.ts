@@ -593,14 +593,27 @@ export function createEngine(deps: EditorialDeps) {
       credits, blocks, disclosures: collectDisclosures(body.blocks), sources: [...new Set(body.blocks.flatMap((b) => b.sources))],
     } };
   }
-  /** Final own-engine visibility only. Legacy acknowledgements omit credit IDs, so retain all historical obligations. */
-  async function finalExportVisibility(ctx: ServiceContext, id: string, revision: number, result: ExportResult): Promise<void> {
+  /** Final own-engine admission and visibility only. Legacy acknowledgements retain all historical credit obligations. */
+  async function finalExportAdmission(ctx: ServiceContext, id: string, revision: number, result: ExportResult, requireApproved: boolean): Promise<void> {
     await sql.tx(async tx => {
       // A fresh coherent own-DB snapshot begins AFTER export COMMIT and the final host callback.
       await tx.query('set transaction isolation level repeatable read read only');
       const selected = await need(tx, ctx, 'document', id, { revision });
       invariant(result.manifest.document === uref(EID, 'document', id, revision) && result.manifest.contentDigest === selected.r.digest,
         'invalid_state', 'The retained export does not match its selected document');
+      // This is own recorded admission, in the SAME fresh coherent snapshot as visibility.
+      // The original export/manifest remains historical; a denial cannot roll its commit back.
+      const links = await tx.query<{ ref: string }>(`select ref from ${S}.links where tenant_id=$1 and project_id=$2 and object_id=$3 and revision=$4`, [...scope(ctx), id, revision]);
+      invariant(await isWithdrawn(tx, ctx, links.map(row => row.ref)) === null,
+        'consent_denied', 'The selected export contains material with recorded withdrawn permission');
+      const blocks = new Set(selected.r.body.blocks.map(block => block.id));
+      invariant(!(await openFlags(tx, ctx, id)).some(flag => flag.kind === 'blocked' && (flag.blockId === null || blocks.has(flag.blockId))),
+        'consent_denied', 'The selected export contains recorded blocked material');
+      if (requireApproved) {
+        const current = (await tx.query(`select status, digest from ${S}.approvals where tenant_id=$1 and project_id=$2 and object_id=$3 and revision=$4 order by at desc limit 1`, [...scope(ctx), id, revision]))[0];
+        invariant(current !== undefined && current.status === 'active' && current.digest === selected.r.digest,
+          'approval_invalid', 'The selected export no longer has an active approval for its content');
+      }
       const projectId = selected.r.body.editorialProjectId;
       await need(tx, ctx, 'editorial_project', projectId);
       const budget = (await tx.query<{ n: number; bytes: string }>(`select count(*)::integer as n, coalesce(sum(octet_length((body->'credits')::text)),0)::text as bytes
@@ -1004,7 +1017,7 @@ export function createEngine(deps: EditorialDeps) {
       // Includes cached acknowledgements and waits for the actual SQL outcome before this final admission.
       // A committed export remains retained even when no content can be returned to this caller.
       await authorize();
-      await finalExportVisibility(ctx, documentId, revision, result);
+      await finalExportAdmission(ctx, documentId, revision, result, options.requireApproved === true);
       return result;
     },
     async listExports(ctx: ServiceContext, documentId: string): Promise<ExportManifest[]> {

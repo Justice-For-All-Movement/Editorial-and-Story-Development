@@ -520,16 +520,24 @@
     },
     {
       "id": "final-export-own-admission",
-      "status": "incomplete WIP baseline tests only; no runtime correction",
+      "status": "incomplete WIP correction; current source/installed qualification pending",
       "baseCommit": "5bfdc24679926ce474124a534c78ba9a84911a6c",
       "documentation": "docs/EXPORT_FINAL_ADMISSION.md",
-      "local": "typecheck using prepared dependencies; no local PostgreSQL/fresh install/full suite claim",
+      "local": "typecheck/build/original design registry pass; prepared dependencies only, no local PG/fresh/full suite claim",
       "remaining": [
-        "baseline actual owning-PG source evidence",
-        "final own recorded withdrawals/blocked flags/required approvals correction",
         "source/normal installed qualification, review/final-head CI/rules/expected-head merge",
         "final external rights and original-human/recursive dependencies/host acceptance remain separate"
-      ]
+      ],
+      "reproduction": {
+        "source": "00ec2b9b4b6a66b857ff76b87317f7d7ee1587af",
+        "job": 135202362987,
+        "tests": 18,
+        "passes": 14,
+        "failures": 4,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "verification": "docs/export-final-admission-verification.json"
     }
   ],
   "approvedDesignSha256": {

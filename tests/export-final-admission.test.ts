@@ -70,3 +70,25 @@ for (const kind of ['permission_withdrawn', 'source_corrected'] as const) test(`
     await assert.rejects(e.exportDocument(ctx(), d.id, 1, options), code(kind === 'permission_withdrawn' ? 'consent_denied' : 'approval_invalid'));
     assert.equal(calls, 2); assert.equal((await e.listExports(ctx(), d.id)).length, 1);
 }));
+
+test('lifting a recorded withdrawal cannot bypass retained blocked flags at final admission', needsPg, () => db(async sql => {
+  let e: EditorialEngine;
+  const s = storage(async () => {
+    await e.applyUpstreamChange(ctx(), { eventId: 'fictional-block-during-put', kind: 'permission_withdrawn', refs: [SEGMENT_INTERVIEW], reason: 'Fictional withdrawal' });
+    await e.applyUpstreamChange(ctx(), { eventId: 'fictional-permission-changed', kind: 'permission_changed', refs: [SEGMENT_INTERVIEW], reason: 'Fictional new decision; old blocked flags remain' });
+  });
+  e = createEngine({ sql, objects: s.objects, ports: { useDecisions: useDecisions() } }); const d = await draft(e);
+  await assert.rejects(e.exportDocument(ctx(), d.id, 1, { idempotencyKey: 'fixed-block-during-put' }), code('consent_denied'));
+  assert.equal((await sql.query('select * from e09_editorial.withdrawn_refs')).length, 0);
+  assert.ok((await e.listFlags(ctx(), { objectId: d.id, status: 'open' })).some(f => f.kind === 'blocked'));
+  assert.equal(s.puts(), 1); assert.deepEqual(await effects(sql), { exports: 1, audits: 1, events: 1 });
+}));
+test('unapproved private export preserves stale-review semantics when approval was not required', needsPg, () => db(async sql => {
+  let e: EditorialEngine;
+  const s = storage(async () => { await e.applyUpstreamChange(ctx(), { eventId: 'fictional-stale-private', kind: 'source_corrected', refs: [SEGMENT_INTERVIEW], reason: 'Fictional review required' }); });
+  e = createEngine({ sql, objects: s.objects, ports: { useDecisions: useDecisions() } }); const d = await draft(e);
+  const ack = await e.exportDocument(ctx(), d.id, 1, { idempotencyKey: 'private-no-approval' });
+  assert.equal(ack.manifest.approval, null); assert.equal(s.puts(), 1);
+  assert.ok((await e.listFlags(ctx(), { objectId: d.id, status: 'open' })).some(f => f.kind === 'stale'));
+  assert.deepEqual(await effects(sql), { exports: 1, audits: 1, events: 1 });
+}));
