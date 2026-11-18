@@ -228,11 +228,10 @@
     },
     {
       "id": "export-all-declared-source-permissions",
-      "status": "implemented and reviewed candidate; actual 45 ordinary and source/fresh-installed E11 chain pass; final all-head/rules/expected-head merge required",
+      "status": "accepted PR4; candidate notes historical",
       "baseCommit": "1f98aa10fcab61b01e3015fb94a026609c4926f2",
       "documentation": "docs/EXPORT_SOURCE_PERMISSIONS.md",
       "remaining": [
-        "fresh final all-head CI/raw results, rules/ready-clean state and expected-head merge",
         "current-source status/final post-render permission checks and host-human/complete rights/lifecycle acceptance"
       ],
       "reproduction": {
@@ -268,7 +267,34 @@
         "failures": 0,
         "cancelled": 0,
         "skips": 0
+      },
+      "sourceCommit": "28dbf0b9a3aeb3575152c1bb877c0cb0f49abf77",
+      "mergeCommit": "7eddc64099ab62dc866ac0af2231a47beee1bfd1",
+      "finalCi": {
+        "ordinaryJob": 134870239763,
+        "ordinaryTests": 45,
+        "realConsentJob": 134870239770,
+        "sourceConsentTests": 1,
+        "freshInstalledPublicServeConsentTests": 1,
+        "realKnowledgeJob": 134870239152,
+        "realFactualJob": 134870239798,
+        "allHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
       }
+    },
+    {
+      "id": "export-current-source-metadata",
+      "status": "incomplete regression WIP; no runtime change yet",
+      "baseCommit": "7eddc64099ab62dc866ac0af2231a47beee1bfd1",
+      "documentation": "docs/EXPORT_CURRENT_SOURCES.md",
+      "remaining": [
+        "actual baseline owning PG regressions",
+        "current E07/E08 admission before new/cached export",
+        "actual peers/installed/source/current-head qualification and expected-head merge",
+        "final post-render/current-human/complete source-rights/host lifecycle acceptance"
+      ]
     }
   ],
   "approvedDesignSha256": {

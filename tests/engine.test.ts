@@ -714,3 +714,36 @@ test('export captures original caller scope and options before host callbacks mu
   assert.deepEqual(exported.manifest.formats, ['markdown']); assert.ok(exported.renderings.markdown); assert.equal(exported.renderings.fountain, undefined);
   assert.equal((await e.listExports(ctx(), id)).length, 1);
 }));
+
+test('saved verified_fact claim labels require current support on new and cached export', needsPg, () => db(async sql => {
+  const k = knowledge(); const e = make(sql, { ports: { knowledge: k, useDecisions: useDecisions() } });
+  const { id } = await doc(e, [block('f')]);
+  const options = { idempotencyKey: 'current-claim-export' };
+  const original = await e.exportDocument(ctx(), id, 1, options);
+  for (const value of [null, { factual: 'contested' }, { stale: true }, { blocked: true }]) {
+    k.set(CLAIM_CONTRACT, value);
+    await assert.rejects(e.exportDocument(ctx(), id, 1), fails('invalid_basis'));
+    await assert.rejects(e.exportDocument(ctx(), id, 1, options), fails('invalid_basis'));
+  }
+  const retained = await e.listExports(ctx(), id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
+  assert.equal((await e.get(ctx(), 'document', id)).body.blocks[0]!.basis, 'verified_fact', 'failure never silently relabels saved text');
+}));
+
+test('saved verified_fact finding labels cannot use historical or withdrawn metadata during export', needsPg, () => db(async sql => {
+  const ref = 'E08:finding:fictional-export@1';
+  let value: import('../src/engine/ports.ts').FindingStatus | null = { ref, state: 'approved', label: 'verified_fact', classification: 'established', stale: false, blocked: false };
+  const e = make(sql, { ports: { findings: { async getFindingStatus() { return value; } }, useDecisions: useDecisions() } });
+  const { id } = await doc(e, [block('f', { sources: [ref] })]);
+  const options = { idempotencyKey: 'current-finding-export' };
+  const original = await e.exportDocument(ctx(), id, 1, options);
+  const accepted = value;
+  for (const patch of [null, { state: 'withdrawn' as const }, { ref: 'E08:finding:fictional-export@2' }, { classification: 'disputed' as const }, { stale: true }, { blocked: true }]) {
+    value = patch === null ? null : { ...accepted!, ...patch };
+    await assert.rejects(e.exportDocument(ctx(), id, 1), fails('invalid_basis'));
+    await assert.rejects(e.exportDocument(ctx(), id, 1, options), fails('invalid_basis'));
+  }
+  const reader = make(sql, { config: { standalone: { knowledge: true } }, ports: { useDecisions: useDecisions() } });
+  await assert.rejects(reader.exportDocument(ctx(), id, 1), fails('unavailable'));
+  const retained = await e.listExports(ctx(), id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
+  assert.equal((await e.get(ctx(), 'document', id)).body.blocks[0]!.sources[0], ref);
+}));
