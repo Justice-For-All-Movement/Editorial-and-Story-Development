@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "repository": "Justice-For-All-Movement/Editorial-and-Story-Development",
+  "planVerified": true,
+  "architectureEngineCount": 15,
+  "originalTaskCount": 122,
+  "scope": "Original approved E09 task IDs and dependencies preserved. Existing service implementation remains; this checkpoint only qualifies a partial real Knowledge HTTP boundary, never full suite/creative/export/closure acceptance. PAM stopped at authorized foundation.",
+  "units": [
+    {
+      "id": "AM-09.01",
+      "title": "Creative briefs and collections",
+      "dependsOn": [
+        "AM-05.02",
+        "AM-05.08"
+      ],
+      "implementationStatus": "existing_service; external integration and original milestone acceptance separate"
+    },
+    {
+      "id": "AM-09.02",
+      "title": "Script and factual line ledger",
+      "dependsOn": [
+        "AM-09.01",
+        "AM-11.01"
+      ],
+      "implementationStatus": "existing_service; external integration and original milestone acceptance separate"
+    },
+    {
+      "id": "AM-09.03",
+      "title": "Scenes perspective and reconstruction",
+      "dependsOn": [
+        "AM-09.01",
+        "AM-09.02"
+      ],
+      "implementationStatus": "existing_service; external integration and original milestone acceptance separate"
+    },
+    {
+      "id": "AM-09.04",
+      "title": "Cinematography and sound planning",
+      "dependsOn": [
+        "AM-09.01",
+        "AM-09.03"
+      ],
+      "implementationStatus": "existing_service; external integration and original milestone acceptance separate"
+    },
+    {
+      "id": "AM-09.05",
+      "title": "Editorial review and correction links",
+      "dependsOn": [
+        "AM-09.01",
+        "AM-09.04"
+      ],
+      "implementationStatus": "existing_service; external integration and original milestone acceptance separate"
+    },
+    {
+      "id": "AM-09.06",
+      "title": "Satire and identity separation",
+      "dependsOn": [
+        "AM-09.01",
+        "AM-09.02",
+        "AM-09.03",
+        "AM-09.04",
+        "AM-09.05"
+      ],
+      "implementationStatus": "existing_service; external integration and original milestone acceptance separate"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "real-knowledge-http",
+      "status": "incomplete WIP; real-engine integration/package/final-head CI pending",
+      "baseCommit": "0639821bcd2efd4a6c0c3d6bc8961cbd3579d4f6",
+      "documentation": "docs/KNOWLEDGE_HTTP.md",
+      "localEvidence": "Five focused synthetic transport groups pass; typecheck/build separate",
+      "remaining": [
+        "actual pinned E07 HTTP integration",
+        "final-head CI/package qualification",
+        "E08 finding status and all-source Consent/current authority integration",
+        "host/deployed/browser/AT/creative quality acceptance"
+      ]
+    }
+  ],
+  "approvedDesignSha256": {
+    "development_backlog.json": "eee514fe5189b6e3133f8c6781b6eff4546dfea4314d334ac21f21ad3cfdae74",
+    "requirements.json": "4091ff2747785906219484b359b5b1720cce97e1cad6f06590b84bd99ab49a2e",
+    "domain_contracts.json": "98ccb94433b5878de815d0bf56a57f48bdd0e2e9eadbcd9efbae919493b2fb8f",
+    "engine_catalog.json": "7e5b265cdb81c2255e01955db08ef4f8ea6b5e480c0866aacaa44cccf973eea8"
+  }
+}
