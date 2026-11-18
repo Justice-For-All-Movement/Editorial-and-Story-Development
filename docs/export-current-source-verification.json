@@ -28,10 +28,21 @@
   "sha256": {
     "src/engine/index.ts": "19a99ac53a1caf407d69e328f5703f4e0d7759aef2dea4116d4804a250c5ed0c",
     "tests/engine.test.ts": "79107e5d76e2a8f5e0f1d0df393d10dc114ea08ba533fb34d5d0fe9aa8567816",
-    "integration/knowledge-http.test.ts": "22d5178c7e151d452bcf5cfc67cae419606a657cad65dcb8e5e20f2f5185a17f",
+    "integration/knowledge-http.test.ts": "54e067b49cba861a0947dcf162567167cb76f179acf2e92a4e05c5d4b864231f",
     "integration/finding-http.test.ts": "3224ea3616b5db30a3d102432de3c66ae2ecf4eeffb988a09cb9d4e4430d3a67",
     ".github/workflows/ci.yml": "e0062f3efdfddc0714b0f1b229ac2edff225b8745ed5608262e51c4fd4c9bd75",
-    "docs/EXPORT_CURRENT_SOURCES.md": "a9d291e3a479bde1e6fd6ee0519b0fe5feca145e4aaecc2132371706c6854e2a",
+    "docs/EXPORT_CURRENT_SOURCES.md": "bd6a06a887aaa64598ba3ac5f03f66b144f018bba2d3cdc1ec2bcee5390bfc2d",
     "docs/ENGINE_API.md": "bed955fbecb55e0b433d211ee8ce39bbdf09d40770ba8de7fab0d26feeeee1cd"
+  },
+  "peerQualification": {
+    "source": "a24389bcc5144e23b071451dc066aef22edadca5",
+    "ordinaryJob": 134876978685,
+    "ordinaryTests": 49,
+    "realFactualJob": 134876978605,
+    "sourceFactualTests": 1,
+    "freshInstalledFactualTests": 1,
+    "passedFailuresCancelledSkipped": 0,
+    "realKnowledgeJob": 134876980169,
+    "knowledgeFailure": "invalid fixture: contested requires evidence links; now valid unassessed reset, all denial/readmission assertions preserved"
   }
 }

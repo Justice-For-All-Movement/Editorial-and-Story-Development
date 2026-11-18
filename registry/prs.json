@@ -312,7 +312,18 @@
         "reason": "two prior export-only fixtures lacked the now-required KnowledgePort; actual new guards passed; fixtures corrected without dropping assertions"
       },
       "localEvidence": "typecheck/build/original-registry pass; copied prepared deps, no local PG/full ordinary/installed-suite claim",
-      "verification": "docs/export-current-source-verification.json"
+      "verification": "docs/export-current-source-verification.json",
+      "peerQualification": {
+        "source": "a24389bcc5144e23b071451dc066aef22edadca5",
+        "ordinaryJob": 134876978685,
+        "ordinaryTests": 49,
+        "realFactualJob": 134876978605,
+        "sourceFactualTests": 1,
+        "freshInstalledFactualTests": 1,
+        "passedFailuresCancelledSkipped": 0,
+        "realKnowledgeJob": 134876980169,
+        "knowledgeFailure": "invalid fixture: contested requires evidence links; now valid unassessed reset, all denial/readmission assertions preserved"
+      }
     }
   ],
   "approvedDesignSha256": {

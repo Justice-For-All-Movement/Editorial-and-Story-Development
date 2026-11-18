@@ -58,8 +58,9 @@ test('Editorial reads the real E07 claim route and current assessment tracks wit
         const d = await editorial.create(ctx(), 'document', { body: { title: 'Fictional exact-source draft', editorialProjectId: p.id, docType: 'article', language: 'en', blocks: [block('f', { sources: [made.ref] })] } });
         const options = { idempotencyKey: 'real-current-claim' };
         const original = await editorial.exportDocument(ctx(), d.id, 1, options);
-        await send('POST', `/v1/claims/${made.id}/assessments`, { dimension: 'factual', value: 'contested', documentedRationale: true,
-          rationale: 'A fictional contrary record changes the controlled metadata assessment for this test only.' });
+        await send('POST', `/v1/claims/${made.id}/assessments`, { dimension: 'factual', value: 'unassessed', documentedRationale: true,
+          rationale: 'An explicit fictional reset leaves this controlled claim unassessed until another documented review.' });
+        assert.equal((await port.getClaimStatus(ctx(), made.ref))?.factual, 'unassessed');
         for (const input of [options, {}]) await assert.rejects(editorial.exportDocument(ctx(), d.id, 1, input), (e: any) => e.code === 'invalid_basis');
         await send('POST', `/v1/claims/${made.id}/assessments`, { dimension: 'factual', value: 'supported', documentedRationale: true,
           rationale: 'A fictional documented reassessment restores the controlled metadata value for this test only.' });
