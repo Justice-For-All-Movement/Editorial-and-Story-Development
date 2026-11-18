@@ -235,14 +235,19 @@ export function createEngine(deps: EditorialDeps) {
       return selected !== null && Number.isSafeInteger(Number(selected[1]));
     };
     invariant(claims.every(exactClaim) && findings.every(exactFindingRef), 'unavailable', 'Exact positive export source editions are required');
-    invariant(claims.length === 0 || ports.knowledge !== undefined || cfg.standalone?.knowledge === true,
+    // Capture method and receiver once: a callback cannot remove the port and skip later obligations.
+    const knowledgePort = ports.knowledge, findingPort = ports.findings;
+    const readClaim = knowledgePort?.getClaimStatus, readFinding = findingPort?.getFindingStatus;
+    invariant(knowledgePort === undefined || typeof readClaim === 'function', 'unavailable', 'Invalid Knowledge metadata port');
+    invariant(findingPort === undefined || typeof readFinding === 'function', 'unavailable', 'Invalid Factual metadata port');
+    invariant(claims.length === 0 || readClaim !== undefined || cfg.standalone?.knowledge === true,
       'unavailable', 'Current Knowledge metadata is required before verified_fact export');
-    invariant(findings.length === 0 || ports.findings !== undefined, 'unavailable', 'Current Factual metadata is required before verified_fact export');
+    invariant(findings.length === 0 || readFinding !== undefined, 'unavailable', 'Current Factual metadata is required before verified_fact export');
     for (const ref of claims) {
-      if (ports.knowledge === undefined) continue; // Explicit standalone remains unchecked, not supported metadata.
+      if (readClaim === undefined) continue; // Admission above requires explicit standalone, never a mid-read removal.
       let status: ClaimStatus | null;
       try {
-        const value = await ports.knowledge.getClaimStatus(ctx, ref);
+        const value = await readClaim.call(knowledgePort, ctx, ref);
         status = value === null ? null : { factual: value.factual, editorial: value.editorial, stale: value.stale, blocked: value.blocked };
       }
       catch { throw new DomainError('unavailable', 'Current Knowledge export metadata could not be obtained'); }
@@ -252,7 +257,7 @@ export function createEngine(deps: EditorialDeps) {
     for (const ref of findings) {
       let status: FindingStatus | null;
       try {
-        const value = await ports.findings!.getFindingStatus(ctx, ref);
+        const value = await readFinding!.call(findingPort, ctx, ref);
         status = value === null ? null : { ref: value.ref, state: value.state, label: value.label, classification: value.classification, stale: value.stale, blocked: value.blocked };
       }
       catch { throw new DomainError('unavailable', 'Current Factual export metadata could not be obtained'); }

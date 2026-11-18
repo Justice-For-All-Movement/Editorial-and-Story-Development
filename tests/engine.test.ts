@@ -774,3 +774,18 @@ test('exact source editions and complete source budgets precede any export metad
   assert.equal(k.calls.length, 0); assert.equal(u.calls.length, consentBefore);
   assert.equal((await e.listExports(ctx(), oversized.id)).length, 0);
 }));
+
+test('a source callback cannot remove its port and skip a later current metadata obligation', needsPg, () => db(async sql => {
+  const { id } = await doc(make(sql), [block('f', { sources: [CLAIM_CONTRACT, CLAIM_DENIAL] })]);
+  let calls = 0;
+  const original = { async getClaimStatus(this: unknown) {
+    assert.equal(this, original, 'captured method keeps its original receiver'); calls++;
+    delete ports.knowledge;
+    return calls === 1 ? { factual: 'supported', editorial: 'approved', stale: false, blocked: false } : null;
+  } };
+  const ports: { knowledge?: import('../src/engine/ports.ts').KnowledgePort; useDecisions: ReturnType<typeof useDecisions> } = { knowledge: original, useDecisions: useDecisions() };
+  const e = make(sql, { ports });
+  await assert.rejects(e.exportDocument(ctx(), id, 1), fails('invalid_basis'));
+  assert.equal(calls, 2, 'second source is still checked after port removal');
+  assert.equal((await e.listExports(ctx(), id)).length, 0);
+}));
