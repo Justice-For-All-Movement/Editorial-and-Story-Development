@@ -106,8 +106,7 @@
       "documentation": "docs/CONSENT_HTTP.md",
       "localEvidence": "11 focused +11 packed exports +4 preserved lyric/HTTP groups/typecheck/build/registry/strict declarations/4runtime bytes match; zero failures/skips; copied prepared deps, not fresh installation/full local suite",
       "remaining": [
-        "real pinned E11 and separate owning Editorial database integration",
-        "package/source review and all final-head CI",
+        "final-head CI/source/package qualification",
         "original human/current all-source rights and output/browser/host acceptance"
       ],
       "pullRequest": "https://github.com/Justice-For-All-Movement/Editorial-and-Story-Development/pull/2",
@@ -123,19 +122,25 @@
         "failures": 0,
         "skips": 0
       },
-      "sourceReview": "clear for scoped evaluation; cached exports/current downstream authority are separate"
+      "sourceReview": "Scoped evaluation and cached export authority correction in the same PR; final qualification pending"
     },
     {
       "id": "export-replay-current-authority",
-      "status": "incomplete regression WIP; CI reproduction and runtime fix pending",
+      "status": "runtime guard implemented; final-head qualification pending",
       "documentation": "docs/EXPORT_REPLAY_AUTHORITY.md",
       "dependsOn": "real-consent-http PR2",
       "remaining": [
-        "real PostgreSQL and actual E11 reproduction",
-        "runtime guard and current authority/cache tests",
-        "source/package/final-head CI qualification",
+        "final-head source/package/CI qualification",
         "host/current Identity/all-source/distributed boundary remains separate"
-      ]
+      ],
+      "reproduction": {
+        "source": "7cb99b30c070cf0898ab849144f8ec8ad195a036",
+        "ordinaryJob": 134756132006,
+        "ordinaryPassed": 32,
+        "expectedRegressionFailures": 2,
+        "realConsentJob": 134756131570,
+        "expectedRegressionFailuresRealConsent": 1
+      }
     }
   ],
   "approvedDesignSha256": {

@@ -30,13 +30,13 @@
     "failures": 0,
     "skips": 0
   },
-  "review": "Clear for scoped fresh decision evaluation, captured exact request before credential work, no override/idempotency/retry, literal deny/review preservation, bounded shared transport and standalone configured-port precedence. Existing Knowledge tests retained; vendor kit/contracts and dependencies/schema unchanged.",
+  "review": "Scoped evaluation plus current export checks before new and cached results in the same PR; current-head qualification pending",
   "limits": [
     "service credential is not original-human delegation/current Identity/rights proof; E11 verifies signatures",
     "remote decision/audit may commit on lost acknowledgement; unavailable is not rollback or stopped proof",
     "no actual-use recording, publication/send/payment/provider operations",
     "copied prepared dependencies, not fresh installation/full local suite/local PostgreSQL/TLS/browser/AT acceptance",
-    "cached export and broader workflow acceptance remain separate; PAM stopped at foundation"
+    "broader workflow and all-source rights acceptance remain separate; PAM stopped at foundation"
   ],
   "sha256": {
     "src/engine/consent-http.ts": "c207b4f7c1e5ad532a214c2e559a3c490da933f602aadee8f0428faa50740c79",
@@ -44,7 +44,10 @@
     "src/engine/knowledge-http.ts": "a01d55ce836fad37e8879d94e36216f3ed3b2f11864b402a4b69b65f8307d753",
     "src/engine/serve.ts": "7885eba35d25c49a07631105808a4f4917ded513ed96046de3e4f42ce45bfd5b",
     "tests/consent-http.test.ts": "52a1317f60b8ec81be70f002ee1bee201a7c84848c45b020b7708234aa91d5d9",
-    "integration/consent-http.test.ts": "8636199d621e3aa7201dd8746a627555cd065a2445a159af8c286902ea4e14a2",
-    "docs/CONSENT_HTTP.md": "2d6f0e8e808b4651ab3cc5559a0e41bc26ec5bc402616d7b9dda62d8a8c1a0e1"
+    "integration/consent-http.test.ts": "b8e048c34e9e384ef88fdac8913a6590a0e0439e9e89ec82a21772950daf147e",
+    "docs/CONSENT_HTTP.md": "2d6f0e8e808b4651ab3cc5559a0e41bc26ec5bc402616d7b9dda62d8a8c1a0e1",
+    "src/engine/index.ts": "17c488785f487ff1f8ef9647b5cde33a7514b934d1dfa11d701a6d7a13e8e7f2",
+    "tests/engine.test.ts": "2cac1ccd8c148a072edf3fe21afbede9e5d37acac68040ce1e10bf49c4f0d281",
+    "docs/EXPORT_REPLAY_AUTHORITY.md": "0a8677484a49e4ecf58a37ce39c77d558ebb77c8daf6a87f9e91feb5614a4c3f"
   }
 }

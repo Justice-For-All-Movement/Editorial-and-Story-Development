@@ -607,6 +607,8 @@ test('cached private export cannot bypass freshly denied Consent and never emits
   const { id } = await doc(e, [block('t', { basis: 'attributed_testimony', attribution: 'Fictional participant', sources: [SEGMENT_INTERVIEW] })]);
   const options = { idempotencyKey: 'cached-export-current-consent' };
   const original = await e.exportDocument(ctx(), id, 1, options);
+  const replay = await e.exportDocument(ctx(), id, 1, options);
+  assert.equal(replay.manifest.exportId, original.manifest.exportId, 'authorized replay returns the original export');
   u.deny.add(SEGMENT_INTERVIEW);
   await assert.rejects(e.exportDocument(ctx(), id, 1, options), fails('consent_denied'));
   const retained = await e.listExports(ctx(), id); assert.equal(retained.length, 1); assert.equal(retained[0]!.exportId, original.manifest.exportId);
