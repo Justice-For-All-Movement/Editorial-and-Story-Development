@@ -38,3 +38,4 @@ export function httpModelPort(options: { endpoint: string; apiKey?: string; time
   };
 }
 export { httpKnowledgePort } from './knowledge-http.ts';
+export { httpUseDecisionPort } from './consent-http.ts';

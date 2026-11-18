@@ -67,7 +67,7 @@
   "checkpoints": [
     {
       "id": "real-knowledge-http",
-      "status": "incomplete WIP; all final-head CI required",
+      "status": "accepted PR1; prior WIP notes historical",
       "baseCommit": "0639821bcd2efd4a6c0c3d6bc8961cbd3579d4f6",
       "documentation": "docs/KNOWLEDGE_HTTP.md",
       "localEvidence": "6 focused+6 packed public-export+4 preserved lyric/HTTP groups, typecheck/build/registry/declarations/3runtime bytes match; zero failures/skips; copied prepared consumer dependencies, not fresh install/full local suite",
@@ -87,7 +87,29 @@
         "ordinary": "25pass/1failure: obsolete invented-route test fixture; corrected locally; no weakened assertions"
       },
       "verification": "docs/knowledge-http-verification.json",
-      "sourceReview": "clear for conservative exact scoped metadata boundary"
+      "sourceReview": "clear for conservative exact scoped metadata boundary",
+      "sourceCommit": "26e2759a76e7285f82916725538ffa881dd48853",
+      "mergeCommit": "d1e6b0d569f03f7ee43af5f64622b20ec923b01e",
+      "finalCi": {
+        "ordinaryJob": 134724743874,
+        "ordinaryTests": 27,
+        "realKnowledgeJob": 134724743153,
+        "realKnowledgeTests": 1,
+        "failures": 0,
+        "skips": 0
+      }
+    },
+    {
+      "id": "real-consent-http",
+      "status": "incomplete WIP; integration and qualification pending",
+      "baseCommit": "d1e6b0d569f03f7ee43af5f64622b20ec923b01e",
+      "documentation": "docs/CONSENT_HTTP.md",
+      "localEvidence": "5 Consent +6 preserved Knowledge local groups pass, zero failures/skips; typecheck/build separate",
+      "remaining": [
+        "real pinned E11 and separate owning Editorial database integration",
+        "package/source review and all final-head CI",
+        "original human/current all-source rights and output/browser/host acceptance"
+      ]
     }
   ],
   "approvedDesignSha256": {
