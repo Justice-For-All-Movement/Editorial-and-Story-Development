@@ -224,6 +224,42 @@ export function createEngine(deps: EditorialDeps) {
     return { decision: d.decision, reasons: [...d.reasons], permissionRefs: [...d.permissionRefs], restrictions: [...d.restrictions], decidedAt: d.decidedAt, subjects: [...subjects], action };
   }
 
+  /** Recheck the metadata needed by saved verified_fact labels; never relabel or borrow another edition. */
+  async function currentExportFacts(ctx: ServiceContext, blocks: readonly Block[]): Promise<void> {
+    const refs = [...new Set(blocks.filter(b => b.basis === 'verified_fact').flatMap(b => b.sources.filter(isFact)))];
+    const claims = refs.filter(ref => parseUref(ref).engine === 'E07');
+    const findings = refs.filter(ref => parseUref(ref).engine === 'E08');
+    invariant(claims.length + findings.length <= 200, 'unavailable', 'Current export source set exceeds the complete metadata budget');
+    const exactClaim = (ref: string): boolean => {
+      const selected = /^E07:claim:[A-Za-z0-9][A-Za-z0-9._-]{0,127}@([1-9][0-9]{0,15})$/.exec(ref);
+      return selected !== null && Number.isSafeInteger(Number(selected[1]));
+    };
+    invariant(claims.every(exactClaim) && findings.every(exactFindingRef), 'unavailable', 'Exact positive export source editions are required');
+    invariant(claims.length === 0 || ports.knowledge !== undefined || cfg.standalone?.knowledge === true,
+      'unavailable', 'Current Knowledge metadata is required before verified_fact export');
+    invariant(findings.length === 0 || ports.findings !== undefined, 'unavailable', 'Current Factual metadata is required before verified_fact export');
+    for (const ref of claims) {
+      if (ports.knowledge === undefined) continue; // Explicit standalone remains unchecked, not supported metadata.
+      let status: ClaimStatus | null;
+      try {
+        const value = await ports.knowledge.getClaimStatus(ctx, ref);
+        status = value === null ? null : { factual: value.factual, editorial: value.editorial, stale: value.stale, blocked: value.blocked };
+      }
+      catch { throw new DomainError('unavailable', 'Current Knowledge export metadata could not be obtained'); }
+      invariant(status !== null && supported.includes(status.factual) && status.stale === false && status.blocked === false,
+        'invalid_basis', 'Current claim metadata does not support a saved verified_fact export label');
+    }
+    for (const ref of findings) {
+      let status: FindingStatus | null;
+      try {
+        const value = await ports.findings!.getFindingStatus(ctx, ref);
+        status = value === null ? null : { ref: value.ref, state: value.state, label: value.label, classification: value.classification, stale: value.stale, blocked: value.blocked };
+      }
+      catch { throw new DomainError('unavailable', 'Current Factual export metadata could not be obtained'); }
+      invariant(findingOk(status, ref), 'invalid_basis', 'Current finding metadata does not support a saved verified_fact export label');
+    }
+  }
+
   // ───────────────────────────── preparation (validation with collaborators) ─────────────────────────────
   type Prepared = { body: Bodies[Kind]; links: Link[]; cols: { editorialProjectId: string | null; parentDocumentId: string | null; language: string | null; docType: string | null }; search: string };
   const noCols = { editorialProjectId: null, parentDocumentId: null, language: null, docType: null };
@@ -852,6 +888,7 @@ export function createEngine(deps: EditorialDeps) {
         const approvalRow = (await tx.query(`select * from ${S}.approvals where tenant_id=$1 and project_id=$2 and object_id=$3 and revision=$4 order by at desc limit 1`, [...scope(ctx), documentId, l.r.revision]))[0];
         const approval = approvalRow === undefined ? null : toApproval(approvalRow, 'document');
         if (options.requireApproved === true) invariant(approval !== null && approval.status === 'active' && approval.digest === l.r.digest, 'approval_invalid', approval === null ? `Revision ${l.r.revision} has no approval` : `The approval of revision ${l.r.revision} is ${approval.status}`);
+        await currentExportFacts(ctx, body.blocks);
         const view = await exportView(tx, ctx, l);
         const intendedUse: UseAction = options.intendedUse === 'publish' ? 'publish' : 'adapt';
         // Every recorded external dependency matters, whatever the block's editorial basis label.

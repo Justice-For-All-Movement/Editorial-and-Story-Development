@@ -286,7 +286,7 @@
     },
     {
       "id": "export-current-source-metadata",
-      "status": "incomplete regression WIP; no runtime change yet",
+      "status": "implemented candidate WIP; local typecheck/build pass, actual baseline/runtime/peer/package/CI qualification pending",
       "baseCommit": "7eddc64099ab62dc866ac0af2231a47beee1bfd1",
       "documentation": "docs/EXPORT_CURRENT_SOURCES.md",
       "remaining": [
