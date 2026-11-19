@@ -224,8 +224,18 @@ export function createEngine(deps: EditorialDeps) {
     return { decision: d.decision, reasons: [...d.reasons], permissionRefs: [...d.permissionRefs], restrictions: [...d.restrictions], decidedAt: d.decidedAt, subjects: [...subjects], action };
   }
 
+  function captureExportFactPorts() {
+    try {
+      const knowledgePort = ports.knowledge, findingPort = ports.findings;
+      const readClaim = knowledgePort?.getClaimStatus, readFinding = findingPort?.getFindingStatus;
+      invariant(knowledgePort === undefined || typeof readClaim === 'function', 'unavailable', 'Invalid Knowledge metadata port');
+      invariant(findingPort === undefined || typeof readFinding === 'function', 'unavailable', 'Invalid Factual metadata port');
+      return { knowledgePort, findingPort, readClaim, readFinding, standalone: cfg.standalone?.knowledge === true };
+    } catch { throw new DomainError('unavailable', 'Export metadata ports are unavailable'); }
+  }
+
   /** Recheck the metadata needed by saved verified_fact labels; never relabel or borrow another edition. */
-  async function currentExportFacts(ctx: ServiceContext, blocks: readonly Block[]): Promise<void> {
+  async function currentExportFacts(ctx: ServiceContext, blocks: readonly Pick<Block, 'basis' | 'sources'>[], captured: ReturnType<typeof captureExportFactPorts>): Promise<void> {
     const refs = [...new Set(blocks.filter(b => b.basis === 'verified_fact').flatMap(b => b.sources.filter(isFact)))];
     const claims = refs.filter(ref => parseUref(ref).engine === 'E07');
     const findings = refs.filter(ref => parseUref(ref).engine === 'E08');
@@ -236,11 +246,8 @@ export function createEngine(deps: EditorialDeps) {
     };
     invariant(claims.every(exactClaim) && findings.every(exactFindingRef), 'unavailable', 'Exact positive export source editions are required');
     // Capture method and receiver once: a callback cannot remove the port and skip later obligations.
-    const knowledgePort = ports.knowledge, findingPort = ports.findings;
-    const readClaim = knowledgePort?.getClaimStatus, readFinding = findingPort?.getFindingStatus;
-    invariant(knowledgePort === undefined || typeof readClaim === 'function', 'unavailable', 'Invalid Knowledge metadata port');
-    invariant(findingPort === undefined || typeof readFinding === 'function', 'unavailable', 'Invalid Factual metadata port');
-    invariant(claims.length === 0 || readClaim !== undefined || cfg.standalone?.knowledge === true,
+    const { knowledgePort, findingPort, readClaim, readFinding, standalone } = captured;
+    invariant(claims.length === 0 || readClaim !== undefined || standalone,
       'unavailable', 'Current Knowledge metadata is required before verified_fact export');
     invariant(findings.length === 0 || readFinding !== undefined, 'unavailable', 'Current Factual metadata is required before verified_fact export');
     for (const ref of claims) {
@@ -947,6 +954,8 @@ export function createEngine(deps: EditorialDeps) {
         }
       } catch { throw new DomainError('forbidden', 'Export is not authorized'); }
       await authorize();
+      const factPorts = captureExportFactPorts();
+      let finalFacts: Pick<Block, 'basis' | 'sources'>[] = [];
       const { idempotencyKey, ...rest } = options;
       const result = await sql.tx(async (tx) => {
         // Replays disclose private content too: current authority must precede the cache.
@@ -964,7 +973,9 @@ export function createEngine(deps: EditorialDeps) {
         if (options.requireApproved === true) invariant(approval !== null && approval.status === 'active' && approval.digest === l.r.digest, 'approval_invalid', approval === null ? `Revision ${l.r.revision} has no approval` : `The approval of revision ${l.r.revision} is ${approval.status}`);
         // Own dependency visibility must pass before current external source callbacks and cached disclosure.
         const view = await exportView(tx, ctx, l);
-        await currentExportFacts(ctx, body.blocks);
+        // Keep original selected obligations, independent of cached result and callback mutation.
+        finalFacts = body.blocks.map(block => ({ basis: block.basis, sources: [...block.sources] }));
+        await currentExportFacts(ctx, finalFacts, factPorts);
         const intendedUse: UseAction = options.intendedUse === 'publish' ? 'publish' : 'adapt';
         // Every recorded external dependency matters, whatever the block's editorial basis label.
         // Keep saved obligations as well as currently loaded viewpoint dependencies; never truncate.
@@ -1017,6 +1028,7 @@ export function createEngine(deps: EditorialDeps) {
       // Includes cached acknowledgements and waits for the actual SQL outcome before this final admission.
       // A committed export remains retained even when no content can be returned to this caller.
       await authorize();
+      await currentExportFacts(ctx, finalFacts, factPorts);
       await finalExportAdmission(ctx, documentId, revision, result, options.requireApproved === true);
       return result;
     },
