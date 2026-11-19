@@ -725,13 +725,15 @@
     },
     {
       "id": "export-final-project-credit-basis",
-      "status": "incomplete WIP baseline; runtime/CI pending",
+      "status": "incomplete WIP correction; baseline/source-installed/head CI pending",
       "baseCommit": "9b0a3378acb00b11a7c213d8e910fed43d29b4cb",
       "documentation": "docs/EXPORT_FINAL_PROJECT_BASIS.md",
       "remaining": [
         "baseline/runtime/source-installed/current-head CI/review/rules/expected merge",
         "historical contributor content-rights/recursive/assets/current-human/host acceptance separate"
-      ]
+      ],
+      "baselineSource": "1f31ac4e64b1386be0e2fa22674e8f6b282a0b24",
+      "verification": "docs/export-final-project-basis-verification.json"
     }
   ],
   "approvedDesignSha256": {

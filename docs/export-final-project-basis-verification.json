@@ -1,0 +1,13 @@
+{
+  "status": "incomplete WIP correction; baseline/source-installed/head CI pending",
+  "baselineSource": "1f31ac4e64b1386be0e2fa22674e8f6b282a0b24",
+  "local": "prepared typecheck/build/registry only; no localPG/fresh/fullsuite",
+  "limits": "selected current project/rendered-credit only; historical visibility preserved; no historical contributor rights/currenthuman/recursive/assets/fence/cleanup/reset/delete/retry authority",
+  "sha256": {
+    "src/engine/index.ts": "9c04dacfe14a2484a8c347737680db646b0154059745fcd519f06d4c5c1a39b3",
+    "tests/export-final-project-basis.test.ts": "417cce441db224f59b1b6c94ec169ac9ca046f191c7851978feb89566c077eae",
+    ".github/workflows/ci.yml": "2e77613f4765e7bdb167d77dacb48735e79ff3e004c445c3dfbbfceed6c01560",
+    "docs/ENGINE_API.md": "ee4c1be9a89d4c4a3dfbc314b4dc37185f74e158db3e200231cbf41e68e82414",
+    "docs/EXPORT_FINAL_PROJECT_BASIS.md": "54cc1aa91c5833678fb66be8fa6665b5d83cf5a32ee69867c3494378fb2d65a1"
+  }
+}

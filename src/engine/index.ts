@@ -611,13 +611,15 @@ export function createEngine(deps: EditorialDeps) {
   const summaryOf = (o: ObjRow & { stale: boolean; blocked: boolean }): Summary => ({ ref: uref(EID, o.kind, o.id, o.revision), id: o.id, kind: o.kind, revision: o.revision, state: o.state, title: o.title, docType: o.doc_type, language: o.language, editorialProjectId: o.editorial_project_id, translationOf: o.parent_document_id, stale: o.stale, blocked: o.blocked, updatedAt: iso(o.updated_at) });
   const toApproval = (r: Record<string, unknown>, kind: Kind): Approval => ({ id: r.id as string, ref: uref(EID, 'approval', r.id as string), objectRef: uref(EID, kind, r.object_id as string, r.revision as number), revision: r.revision as number, digest: r.digest as string, status: r.status as Approval['status'], approverId: r.approver_id as string, note: (r.note as string | null) ?? null, at: iso(r.at), invalidatedReason: (r.invalidated_reason as string | null) ?? null, invalidatedCause: (r.invalidated_cause as string | null) ?? null });
 
-  async function exportView(q: Sql, ctx: ServiceContext, l: Loaded): Promise<{ doc: ExportDocument; project: Loaded; viewpoints: Map<string, ViewpointBody>; viewpointBasis: ReadonlyMap<string, string> }> {
+  async function exportView(q: Sql, ctx: ServiceContext, l: Loaded): Promise<{ doc: ExportDocument; project: Loaded; viewpoints: Map<string, ViewpointBody>; viewpointBasis: ReadonlyMap<string, string>; projectCreditBasis: ReadonlyMap<string, string> }> {
     const body = l.r.body as DocumentBody;
     const project = await need(q, ctx, 'editorial_project', body.editorialProjectId);
     const pb = project.r.body as ProjectBody;
+    const projectCreditBasis = new Map<string, string>([[project.o.id, bodyDigest({ revision: project.r.revision, digest: project.r.digest, body: project.r.body })]]);
     const credits: ExportDocument['credits'] = [];
     for (const c of pb.credits) {
       const col = await need(q, ctx, 'collaborator', c.collaboratorId);
+      projectCreditBasis.set(col.o.id, bodyDigest({ revision: col.r.revision, digest: col.r.digest, body: col.r.body }));
       credits.push({ name: col.r.body.name, role: c.role, creditLine: c.creditLine ?? col.r.body.creditLine });
     }
     const viewpoints = new Map<string, ViewpointBody>();
@@ -630,14 +632,14 @@ export function createEngine(deps: EditorialDeps) {
     }
     const blocks: ExportBlock[] = body.blocks.map((b) => { const v = b.viewpointId === undefined ? undefined : viewpoints.get(b.viewpointId); return v === undefined ? b : { ...b, viewpoint: { id: b.viewpointId as string, label: v.label, attribution: v.attribution } }; });
     const n = pb.projectKind === 'satire' ? notice(body.language, 'satire') : pb.projectKind === 'campaign' ? notice(body.language, 'campaign').replace('{identity}', pb.publishingIdentity) : null;
-    return { project, viewpoints, viewpointBasis, doc: {
+    return { project, viewpoints, viewpointBasis, projectCreditBasis, doc: {
       document: { ref: uref(EID, 'document', l.o.id, l.r.revision), id: l.o.id, revision: l.r.revision, title: body.title, docType: body.docType, language: body.language, reviewState: l.r.review_state, translationOf: body.translationOf === undefined ? null : { ref: uref(EID, 'document', body.translationOf.documentId, body.translationOf.revision) } },
       labels: { projectKind: pb.projectKind, format: pb.format, publishingIdentity: pb.publishingIdentity, projectTitle: pb.title, notice: n },
       credits, blocks, disclosures: collectDisclosures(body.blocks), sources: [...new Set(body.blocks.flatMap((b) => b.sources))],
     } };
   }
   /** Final own-engine admission and visibility only. Legacy acknowledgements retain all historical credit obligations. */
-  async function finalExportAdmission(ctx: ServiceContext, id: string, revision: number, result: ExportResult, requireApproved: boolean, viewpointBasis: ReadonlyMap<string, string>): Promise<void> {
+  async function finalExportAdmission(ctx: ServiceContext, id: string, revision: number, result: ExportResult, requireApproved: boolean, viewpointBasis: ReadonlyMap<string, string>, projectCreditBasis: ReadonlyMap<string, string>): Promise<void> {
     await sql.tx(async tx => {
       // A fresh coherent own-DB snapshot begins AFTER export COMMIT and the final host callback.
       await tx.query('set transaction isolation level repeatable read read only');
@@ -658,7 +660,15 @@ export function createEngine(deps: EditorialDeps) {
           'approval_invalid', 'The selected export no longer has an active approval for its content');
       }
       const projectId = selected.r.body.editorialProjectId;
-      await need(tx, ctx, 'editorial_project', projectId);
+      const currentProject = await need(tx, ctx, 'editorial_project', projectId);
+      invariant(bodyDigest({ revision: currentProject.r.revision, digest: currentProject.r.digest, body: currentProject.r.body }) === projectCreditBasis.get(projectId),
+        'consent_denied', 'Selected export project basis changed; request a fresh review');
+      for (const [id, expected] of projectCreditBasis) {
+        if (id === projectId) continue;
+        const current = await need(tx, ctx, 'collaborator', id);
+        invariant(bodyDigest({ revision: current.r.revision, digest: current.r.digest, body: current.r.body }) === expected,
+          'consent_denied', 'Selected export credit basis changed; request a fresh review');
+      }
       const budget = (await tx.query<{ n: number; bytes: string }>(`select count(*)::integer as n, coalesce(sum(octet_length((body->'credits')::text)),0)::text as bytes
         from (select body from ${S}.revisions where tenant_id=$1 and project_id=$2 and object_id=$3 order by revision limit 1025) history`, [...scope(ctx), projectId]))[0];
       invariant(budget !== undefined && budget.n <= 1024 && Number(budget.bytes) <= 512 * 1024,
@@ -999,6 +1009,7 @@ export function createEngine(deps: EditorialDeps) {
       let finalFacts: Pick<Block, 'basis' | 'sources'>[] = [];
       let finalUse: (() => Promise<Json>) | undefined;
       let finalViewpoints: ReadonlyMap<string, string> = new Map();
+      let finalProjectCredits: ReadonlyMap<string, string> = new Map();
       const { idempotencyKey, ...rest } = options;
       const result = await sql.tx(async (tx) => {
         // Replays disclose private content too: current authority must precede the cache.
@@ -1017,6 +1028,7 @@ export function createEngine(deps: EditorialDeps) {
         // Own dependency visibility must pass before current external source callbacks and cached disclosure.
         const view = await exportView(tx, ctx, l);
         finalViewpoints = view.viewpointBasis;
+        finalProjectCredits = view.projectCreditBasis;
         // Keep original selected obligations, independent of cached result and callback mutation.
         finalFacts = body.blocks.map(block => ({ basis: block.basis, sources: [...block.sources] }));
         await currentExportFacts(ctx, finalFacts, factPorts);
@@ -1065,7 +1077,7 @@ export function createEngine(deps: EditorialDeps) {
       await authorize();
       await currentExportFacts(ctx, finalFacts, factPorts);
       if (finalUse !== undefined) await finalUse();
-      await finalExportAdmission(ctx, documentId, revision, result, options.requireApproved === true, finalViewpoints);
+      await finalExportAdmission(ctx, documentId, revision, result, options.requireApproved === true, finalViewpoints, finalProjectCredits);
       return result;
     },
     async listExports(ctx: ServiceContext, documentId: string): Promise<ExportManifest[]> {
