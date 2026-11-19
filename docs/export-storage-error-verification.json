@@ -1,0 +1,32 @@
+{
+  "status": "baseline reproduced; runtime committed, actual source-installed/full head CI pending",
+  "baselineSource": "83d5af3f0dd6e43a1835af11aa9a13c77f656de7",
+  "baselineFocused": {
+    "job": 135544129717,
+    "tests": 45,
+    "passes": 42,
+    "failures": 3,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "baselineOrdinary": {
+    "job": 135544129729,
+    "tests": 95,
+    "passes": 92,
+    "failures": 3,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "baselineQualification": "three marker leaks including forged DomainError; later retention/audit assertions not reached",
+  "runtimeSource": "471fe17dc4a38f880a85bf477679dfdcc186788e",
+  "sha256": {
+    "src/engine/index.ts": "e695f584a48c0fc9e4452cc76f413032097f88fc9d1da97e63aca74edaebe41d",
+    "tests/export-storage-errors.test.ts": "23652677213a763c8dbd229e9d48940b0c30e72b0895f1af5676192577ff6871",
+    ".github/workflows/ci.yml": "d37a21c14690b8f9a75226bae3b32bbecf770384981744f03bc24e9a82baf462",
+    "docs/ENGINE_API.md": "3af63e70861088204dc354b6d3f2623090be95ccbbe5294daffc2b53728e36c9",
+    "docs/EXPORT_STORAGE_ERRORS.md": "ef79f6f2fc2dea334614ee7308cd935b09b3fe33b4d849f9cbcee958165c8027"
+  },
+  "sourceReview": "selected optional store and put method/receiver for actual new write; getter-invalid-rejected callbacks sanitized; no trust in callback DomainError; byte retention/SQL uncertainty explicit; permissions/current/final admission unchanged",
+  "local": "prepared typecheck/build PASS; no localPG/fresh/fullsuite",
+  "limits": "engine error only; no HTTP/crash/liveness/orphan/receipt/stopped-nooutput/atomicity/currenthuman/rights/sandbox/host/cleanup/retry qualification"
+}
