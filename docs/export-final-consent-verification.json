@@ -1,5 +1,5 @@
 {
-  "status": "incomplete WIP source-installed/CI-review-merge pending",
+  "status": "source and package qualified candidate; final documentation-head CI/review/rules/expected merge pending",
   "baselineSource": "4ef02dfc1595995539f2870901af39df184222bb",
   "baselineJob": 135302247892,
   "baselineResults": {
@@ -21,7 +21,7 @@
     "tests/export-final-consent.test.ts": "e96b7daf899c17f98c64e548d50b08e9b745b7912cc3165c072a0ecc1f2f5430",
     ".github/workflows/ci.yml": "f6098367c4c13ab6ead9ec1981948f5983e5c5f24bde8458ff8dd2afb9e51f87",
     "docs/ENGINE_API.md": "32d618d71f0c692327f0b0662917fcd0a182fe8b7f5872e6a53917822501e940",
-    "docs/EXPORT_FINAL_CONSENT.md": "d4d4f9885c3034eaa12a0ca654978c562847400eac3e0ec57b9a9bc24021d3ae",
+    "docs/EXPORT_FINAL_CONSENT.md": "834835edc9616c4e63b642994c0443e1f2d63bd2f400e1bcf3b12346132c94fa",
     "tests/engine.test.ts": "f4734823de1bf68c19364d98019def1d32ce53cad1cee1b8bed7afe82647530f"
   },
   "initialCorrection": {
@@ -46,5 +46,22 @@
     "actualE11Source": 1,
     "actualE11InstalledServe": 1,
     "reason": "old total call count4 now5; assert cumulative calls2/3/4/5, all denial/privacy/history assertions retained"
-  }
+  },
+  "qualifiedSource": "41e66a0fbe77a8f244effc7678e5d21e8613687f",
+  "qualification": {
+    "ordinaryJob": 135305377241,
+    "ordinaryTests": 84,
+    "focusedJob": 135305377114,
+    "sourceTests": 34,
+    "normalFreshInstalledTests": 34,
+    "actualE11Source": 1,
+    "actualE11InstalledServe": 1,
+    "actualE07Job": 135305377207,
+    "actualE08Job": 135305376797,
+    "headChecks": "8 success",
+    "failures": 0,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "sourceReview": "clear: original request/method/receiver/initial standalone captured after complete budget; fresh postCOMMIT/finalhost/facts before own final admission; retained historical ACK/effects; no full current basis-human-recursive/distributed fence claim"
 }
