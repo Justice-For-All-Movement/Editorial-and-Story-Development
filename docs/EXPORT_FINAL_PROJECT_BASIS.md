@@ -1,0 +1,5 @@
+# Selected export project and credits continuity
+
+Incomplete WIP baseline regressions for complete selected current editorial project and current rendered credit-collaborator edition/body/digest continuity across storage and final policy callbacks. Four owning PostgreSQL regressions use public revisions during put or cached final Consent. Source and normal fresh-installed checks wired; runtime/baseline/CI pending. Retain bytes, histories and original ACK/effects on denial; a separate explicitly authorized request may return original ACK without a second effect. Historical contributor visibility remains mandatory.
+
+This is selected project/rendered-credit continuity only: not all historical contributor content/current rights, recursive E09/assets/current original-human authority, truth or continuous writer/external permission fencing. Original15/122 IDs/deps/pins/SQLkit/contracts unchanged/privatefictional/no send-publication-payment-paid/PAM foundationSTOP. Prepared local typecheck/build/registry is not local PG/fresh/full-suite qualification.
