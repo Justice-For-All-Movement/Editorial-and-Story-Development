@@ -682,10 +682,13 @@ test('all-source export retains literal adapt review, rejects unknown decisions 
   } } } });
   const reviewed = await reader.exportDocument(ctx(), id, 1);
   assert.equal((reviewed.manifest.useDecisions[0] as any).decision, 'review', 'a private review draft is never relabelled allow');
+  assert.equal(calls, 2, 'private adapt review is obtained before storage and freshly after COMMIT');
   await assert.rejects(reader.exportDocument(ctx(), id, 1, { intendedUse: 'publish' }), fails('consent_denied', /review/));
+  assert.equal(calls, 3, 'publish review denies at initial admission without a final disclosure check');
   mode = 'unexpected'; await assert.rejects(reader.exportDocument(ctx(), id, 1), fails('unavailable'));
+  assert.equal(calls, 4, 'invalid initial decisions fail closed before storage or final admission');
   mode = 'throw'; await assert.rejects(reader.exportDocument(ctx(), id, 1), e => e instanceof DomainError && e.code === 'consent_denied' && !String(e).includes('SYNTHETIC_PRIVATE_DIAGNOSTIC'));
-  assert.equal(calls, 4); assert.equal((await reader.listExports(ctx(), id)).length, 1);
+  assert.equal(calls, 5, 'throwing initial decisions do not reach final admission'); assert.equal((await reader.listExports(ctx(), id)).length, 1);
 }));
 
 test('all-source request rejects the whole over-budget dependency set before calling Consent', needsPg, () => db(async sql => {

@@ -21,7 +21,8 @@
     "tests/export-final-consent.test.ts": "e96b7daf899c17f98c64e548d50b08e9b745b7912cc3165c072a0ecc1f2f5430",
     ".github/workflows/ci.yml": "f6098367c4c13ab6ead9ec1981948f5983e5c5f24bde8458ff8dd2afb9e51f87",
     "docs/ENGINE_API.md": "32d618d71f0c692327f0b0662917fcd0a182fe8b7f5872e6a53917822501e940",
-    "docs/EXPORT_FINAL_CONSENT.md": "2d8722bcdbbac9292221348830a7a55a0500fc3adfc2c4414e3a7e8a481b005c"
+    "docs/EXPORT_FINAL_CONSENT.md": "d4d4f9885c3034eaa12a0ca654978c562847400eac3e0ec57b9a9bc24021d3ae",
+    "tests/engine.test.ts": "f4734823de1bf68c19364d98019def1d32ce53cad1cee1b8bed7afe82647530f"
   },
   "initialCorrection": {
     "source": "caa2bc9fdc893039f78816ed151a700ddd33c1ff",
@@ -32,5 +33,18 @@
     "cancelled": 0,
     "skips": 0,
     "fix": "preserve trusted local publish-review diagnosis outside sanitized remote-callback boundary; assertions unchanged"
+  },
+  "diagnosticCorrection": {
+    "source": "1bc99d9fddc7b218bc3f5878a916da965042af89",
+    "ordinaryJob": 135304075337,
+    "ordinaryTests": 84,
+    "passes": 83,
+    "failures": 1,
+    "focusedJob": 135304075034,
+    "sourceTests": 34,
+    "normalFreshInstalledTests": 34,
+    "actualE11Source": 1,
+    "actualE11InstalledServe": 1,
+    "reason": "old total call count4 now5; assert cumulative calls2/3/4/5, all denial/privacy/history assertions retained"
   }
 }
