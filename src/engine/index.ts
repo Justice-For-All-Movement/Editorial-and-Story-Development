@@ -1055,7 +1055,10 @@ export function createEngine(deps: EditorialDeps) {
           const exportId = randomUUID();
           const byRole = (roles: string[]): string[] => [...new Set(linkRows.filter((r) => roles.includes(r.role)).map((r) => r.ref))].sort();
           const scopeKey = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
-          const objectKey = deps.objects !== undefined && scopeKey.test(ctx.tenantId) && scopeKey.test(ctx.projectId) ? `${ctx.tenantId}/${ctx.projectId}/exports/${documentId}/${exportId}.json` : null;
+          let exportStore: ObjectStore | undefined;
+          try { exportStore = deps.objects; }
+          catch { throw new DomainError('storage_unknown', 'Private export storage outcome is unknown'); }
+          const objectKey = exportStore !== undefined && scopeKey.test(ctx.tenantId) && scopeKey.test(ctx.projectId) ? `${ctx.tenantId}/${ctx.projectId}/exports/${documentId}/${exportId}.json` : null;
           const manifestOut: ExportManifest = {
             exportId, engine: EID, engineVersion: manifest.version, document: view.doc.document.ref, revision: l.r.revision, contentDigest: l.r.digest, reviewState: l.r.review_state,
             approval: approval === null ? null : { id: approval.id, status: approval.status, approverId: approval.approverId, at: approval.at }, formats: formatsWanted,
@@ -1065,7 +1068,14 @@ export function createEngine(deps: EditorialDeps) {
             useDecisions, intendedUse, exportedAt: ctx.now, exportedBy: ctx.actor.id, objectKey,
           };
           const result: ExportResult = { manifest: manifestOut, document: view.doc, renderings };
-          if (objectKey !== null && deps.objects !== undefined) await deps.objects.put(objectKey, new TextEncoder().encode(JSON.stringify(clean(result))));
+          if (objectKey !== null && exportStore !== undefined) {
+            // A storage adapter may write and then reject. Its diagnostics (even DomainErrors) are private.
+            try {
+              const put = exportStore.put;
+              if (typeof put !== 'function') throw Error('Unavailable storage writer');
+              await put.call(exportStore, objectKey, new TextEncoder().encode(JSON.stringify(clean(result))));
+            } catch { throw new DomainError('storage_unknown', 'Private export storage outcome is unknown'); }
+          }
           await tx.query(`insert into ${S}.exports (tenant_id, project_id, id, object_id, revision, formats, manifest, digest, object_key, actor_id, at) values ($1,$2,$3,$4,$5,$6::text[],$7::jsonb,$8,$9,$10,$11)`, [...scope(ctx), exportId, documentId, l.r.revision, formatsWanted, JSON.stringify(clean(manifestOut)), l.r.digest, objectKey, ctx.actor.id, ctx.now]);
           await appendAudit(tx, S, ctx, 'document.exported', uref(EID, 'document', documentId), { export: exportId, revision: l.r.revision, digest: l.r.digest, formats: formatsWanted, intendedUse });
           await emitEvent(tx, S, ctx, 'editorial.exported', view.doc.document.ref, { export: uref(EID, 'export', exportId), revision: l.r.revision, digest: l.r.digest, formats: formatsWanted });

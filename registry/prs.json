@@ -725,7 +725,7 @@
     },
     {
       "id": "export-final-project-credit-basis",
-      "status": "implementation/source/package qualification complete; GitHub governs current CI/readiness/merge; staged WIP notes historical",
+      "status": "accepted PR13; staged WIP notes historical",
       "baseCommit": "9b0a3378acb00b11a7c213d8e910fed43d29b4cb",
       "documentation": "docs/EXPORT_FINAL_PROJECT_BASIS.md",
       "remaining": [
@@ -744,6 +744,70 @@
         "actualE11InstalledServe": 1,
         "actualE07Job": 135349887781,
         "actualE08Job": 135349888203,
+        "headChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceCommit": "703b25c9d7757eeec5c66c7a420a0ec107edaa09",
+      "mergeCommit": "7a603eb4611655ead81488ea979512c3385f0955",
+      "finalCi": {
+        "ordinaryJob": 135350746269,
+        "ordinaryTests": 92,
+        "focusedJob": 135350746310,
+        "sourceTests": 42,
+        "normalFreshInstalledTests": 42,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "actualE07Job": 135350746045,
+        "actualE08Job": 135350746276,
+        "headChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
+    },
+    {
+      "id": "export-storage-error-privacy",
+      "status": "95 ordinary/45 source-installed and E07/E08/E11 runtime qualified; final head CI pending",
+      "baseCommit": "7a603eb4611655ead81488ea979512c3385f0955",
+      "documentation": "docs/EXPORT_STORAGE_ERRORS.md",
+      "local": "prepared typecheck/build passed; no localPG/fresh/fullsuite",
+      "remaining": [
+        "fresh final documentation-head CI/review/rules/expected merge",
+        "unknown bytes retained; no HTTP/orphan reconciliation/receipt/stopped-nooutput/liveness/atomicity/currenthuman/rights/sandbox/host/cleanup/retry qualification"
+      ],
+      "baselineSource": "83d5af3f0dd6e43a1835af11aa9a13c77f656de7",
+      "baselineFocused": {
+        "job": 135544129717,
+        "tests": 45,
+        "passes": 42,
+        "failures": 3,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "baselineOrdinary": {
+        "job": 135544129729,
+        "tests": 95,
+        "passes": 92,
+        "failures": 3,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "runtimeSource": "471fe17dc4a38f880a85bf477679dfdcc186788e",
+      "verification": "docs/export-storage-error-verification.json",
+      "sourceReview": "selected optional store and put method/receiver for actual new write; getter-invalid-rejected callbacks sanitized; no trust in callback DomainError; byte retention/SQL uncertainty explicit; permissions/current/final admission unchanged",
+      "qualification": {
+        "ordinaryJob": 135544484075,
+        "ordinaryTests": 95,
+        "focusedJob": 135544483623,
+        "sourceTests": 45,
+        "normalFreshInstalledTests": 45,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "actualE07Job": 135544484233,
+        "actualE08Job": 135544484079,
+        "E07E08SourceInstalledEach": 1,
         "headChecks": "8 success",
         "failures": 0,
         "cancelled": 0,
