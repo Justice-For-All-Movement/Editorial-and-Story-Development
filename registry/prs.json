@@ -576,7 +576,7 @@
     },
     {
       "id": "export-final-factual-metadata",
-      "status": "runtime source/installed qualified; final documentation-head CI/merge pending",
+      "status": "accepted PR10; old candidate pending notes historical",
       "baseCommit": "d50909f9c45ceb9ffe25e4da8779cf1b90619d0e",
       "documentation": "docs/EXPORT_FINAL_FACTS.md",
       "remaining": [
@@ -611,7 +611,62 @@
         "cancelled": 0,
         "skips": 0
       },
-      "sourceReview": "clear: original basis/source obligations copied before callbacks-cache; exact E07/E08 metadata before and after actual COMMIT/final host callback; configured method-receiver/standalone captured once; no getter/callback diagnostics leaked; retain original effects and own final admission after remote checks; sequential not all-source/current-human/fence"
+      "sourceReview": "clear: original basis/source obligations copied before callbacks-cache; exact E07/E08 metadata before and after actual COMMIT/final host callback; configured method-receiver/standalone captured once; no getter/callback diagnostics leaked; retain original effects and own final admission after remote checks; sequential not all-source/current-human/fence",
+      "sourceCommit": "b56907091b04ef2b49f95cc72920c3489f02194b",
+      "mergeCommit": "afa3736eede95f9b5cdf23c7e913ce935bd31882",
+      "finalCi": {
+        "ordinaryJob": 135282103288,
+        "ordinaryTests": 77,
+        "focusedJob": 135282102966,
+        "sourceTests": 27,
+        "normalFreshInstalledTests": 27,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "actualE07Job": 135282103475,
+        "actualE08Job": 135282103384,
+        "headChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
+    },
+    {
+      "id": "export-final-declared-consent",
+      "status": "source and package qualified candidate; final documentation-head CI/review/rules/expected merge pending",
+      "baseCommit": "afa3736eede95f9b5cdf23c7e913ce935bd31882",
+      "documentation": "docs/EXPORT_FINAL_CONSENT.md",
+      "remaining": [
+        "final documentation-head CI/review/rules/expected merge",
+        "complete current viewpoint/selected basis comparison, recursive E09, current human/host/orphan uncertainty remain separate"
+      ],
+      "baselineSource": "4ef02dfc1595995539f2870901af39df184222bb",
+      "baselineJob": 135302247892,
+      "baselineResults": {
+        "tests": 29,
+        "passes": 27,
+        "failures": 2,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "local": "typecheck/build/originalregistry pass with prepared dependencies; no local PG/fresh/full suite claim",
+      "verification": "docs/export-final-consent-verification.json",
+      "qualifiedSource": "41e66a0fbe77a8f244effc7678e5d21e8613687f",
+      "qualification": {
+        "ordinaryJob": 135305377241,
+        "ordinaryTests": 84,
+        "focusedJob": 135305377114,
+        "sourceTests": 34,
+        "normalFreshInstalledTests": 34,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "actualE07Job": 135305377207,
+        "actualE08Job": 135305376797,
+        "headChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear: original request/method/receiver/initial standalone captured after complete budget; fresh postCOMMIT/finalhost/facts before own final admission; retained historical ACK/effects; no full current basis-human-recursive/distributed fence claim"
     }
   ],
   "approvedDesignSha256": {
