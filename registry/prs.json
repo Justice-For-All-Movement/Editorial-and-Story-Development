@@ -576,13 +576,17 @@
     },
     {
       "id": "export-final-factual-metadata",
-      "status": "incomplete WIP baseline tests only; runtime unchanged",
+      "status": "incomplete WIP correction; source-installed/full-final-head qualification pending",
       "baseCommit": "d50909f9c45ceb9ffe25e4da8779cf1b90619d0e",
       "documentation": "docs/EXPORT_FINAL_FACTS.md",
       "remaining": [
         "baseline/correction/source-normal-installed/full-final-head CI-review-rules-expected merge",
         "final all-source Consent/recursive E09/current-human/host lifecycle and orphan uncertainty separate"
-      ]
+      ],
+      "baselineSource": "18bfd13be94ba5860ec0ab7f87b65a57256c4a13",
+      "baselineJob": 135280389180,
+      "local": "one pure no-SQL getter group/typecheck/build/registry pass with prepared dependencies; no local PG/fresh/full suite claim",
+      "verification": "docs/export-final-facts-verification.json"
     }
   ],
   "approvedDesignSha256": {

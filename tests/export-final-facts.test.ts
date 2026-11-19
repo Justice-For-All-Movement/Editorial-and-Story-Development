@@ -40,3 +40,29 @@ for (const engine of ['E07', 'E08'] as const) for (const at of ['put', 'final-ho
     assert.equal(puts, 1); assert.deepEqual(await effects(), [{ exports: 1, audits: 1, events: 1 }]);
   }));
 }
+
+for (const mode of ['remove', 'error'] as const) test(`final fact check retains captured method and sanitizes ${mode}`, needsPg, () => withDisposableDatabase(pg, ADMIN, async (_url, sql) => {
+  await migrate(sql); let bad = false, calls = 0;
+  const knowledge = { async getClaimStatus() { assert.equal(this, knowledge); calls++; if (bad && mode === 'error') throw Error('SYNTHETIC_PRIVATE_METADATA'); return { factual: bad ? 'refuted' as const : 'supported' as const, editorial: 'approved' as const, stale: false, blocked: bad }; } };
+  const ports: { knowledge?: typeof knowledge; useDecisions: ReturnType<typeof useDecisions> } = { knowledge, useDecisions: useDecisions() };
+  const objects: ObjectStore = { async put(key, bytes) { bad = true; if (mode === 'remove') delete ports.knowledge; return { key, size: bytes.byteLength, sha256: createHash('sha256').update(bytes).digest('hex') }; }, async get() { throw Error('no reads'); }, async head() { return null; }, async list() { return []; }, async delete() { throw Error('no deletion'); } };
+  const e = createEngine({ sql, ports, objects, config: { standalone: { knowledge: true } } });
+  const p = await e.create(ctx(), 'editorial_project', { body: project() });
+  const d = await e.create(ctx(), 'document', { body: { title: 'Fictional captured metadata', editorialProjectId: p.id, docType: 'article', language: 'en', blocks: [block('f')] } }); calls = 0;
+  await assert.rejects(e.exportDocument(ctx(), d.id, 1, { idempotencyKey: `captured-final-${mode}` }), (error: any) => {
+    assert.equal(error.code, mode === 'remove' ? 'invalid_basis' : 'unavailable'); assert.ok(!String(error).includes('SYNTHETIC_PRIVATE_METADATA')); return true;
+  });
+  assert.equal(calls, 2); assert.equal((await e.listExports(ctx(), d.id)).length, 1);
+}));
+
+test('metadata port getters fail closed with sanitized errors before SQL', async () => {
+  let reads = 0;
+  const sql: import('../src/service-kit.ts').Sql = { async query() { reads++; throw Error('unexpected SQL'); }, async tx() { reads++; throw Error('unexpected SQL'); } };
+  for (const key of ['knowledge', 'findings']) {
+    const ports = Object.defineProperty({}, key, { get() { throw Error('SYNTHETIC_PRIVATE_METADATA'); } });
+    await assert.rejects(createEngine({ sql, ports }).exportDocument(ctx(), '00000000-0000-4000-8000-000000000001', 1), (error: any) => {
+      assert.equal(error.code, 'unavailable'); assert.ok(!String(error).includes('SYNTHETIC_PRIVATE_METADATA')); return true;
+    });
+  }
+  assert.equal(reads, 0);
+});

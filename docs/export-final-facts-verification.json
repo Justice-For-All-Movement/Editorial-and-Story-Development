@@ -1,0 +1,18 @@
+{
+  "status": "incomplete WIP corrected source-installed/CI/review/merge pending",
+  "baselineSource": "18bfd13be94ba5860ec0ab7f87b65a57256c4a13",
+  "baselineJob": 135280389180,
+  "local": "one pure no-SQL getter group/typecheck/build/registry pass with prepared dependencies; no local PG/fresh/full suite claim",
+  "limits": [
+    "metadata snapshots are not source-truth/current-rights/continuous authority proof",
+    "final all-source Consent/recursive E09/current original-human/host acceptance separate",
+    "retained original ACK is historical; unknown not rollback or autoretry/delete authority"
+  ],
+  "sha256": {
+    "src/engine/index.ts": "10bc2739c4927739c4f6728784c2bea3b7136b4d50ead503837674b3a642fe21",
+    "tests/export-final-facts.test.ts": "e0e9b943130d9a11e823f7e7b35aaba20f7af344540cbf8c4818312c01c015c3",
+    ".github/workflows/ci.yml": "8f12ffb0f7200c3e023cdf9c603fe3e6fa60f2a286ce889624ce5b5abb5c6191",
+    "docs/ENGINE_API.md": "139756bab84d5816990ed580c3c394a262317e6c61ba3a5401ba12886ac6eecf",
+    "docs/EXPORT_FINAL_FACTS.md": "9f1f88c5a6725eef2f31701865d85a2276693747b767b2f1d3aab6b041abb607"
+  }
+}
