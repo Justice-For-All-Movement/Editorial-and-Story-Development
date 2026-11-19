@@ -1,0 +1,43 @@
+{
+  "status": "source and package qualified candidate; final documentation-head CI/review/rules/expected merge pending",
+  "baselineSource": "05be25072d515a5a4882e24f13a63a8bf2c436e1",
+  "baselineJob": 135307608418,
+  "baselineResults": {
+    "tests": 38,
+    "passes": 34,
+    "failures": 4,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "local": "typecheck/build/registry passed with prepared dependencies only; no local PG/fresh/full suite claim",
+  "limits": [
+    "selected-viewpoint continuity only; whole project/credits/assets/recursive/current original-human authority separate",
+    "own coherent snapshot not continuous writer/external permission fence",
+    "unknown not rollback or cleanup/reset/delete/retry authority",
+    "private fictional/no sends/publication/payment/paid/PAM foundation STOP"
+  ],
+  "sha256": {
+    "src/engine/index.ts": "a5cf11bea424c4ed2b0927272d8f62b271f4c9b26c7ea1c1d5cc2770531bac32",
+    "tests/export-final-viewpoint.test.ts": "78a206901b2c66877997baa1606faae605f73940cec9d2a8099a1302a5956182",
+    ".github/workflows/ci.yml": "5880512a6e3636c42ba4cd2e746e42d20e0c567f75cbb092aceafefcc277fbdf",
+    "docs/ENGINE_API.md": "4517b1cf8517fbfadc5a1862cda5e2a775952fbccec9256bb4ba8ce77cd2eaab",
+    "docs/EXPORT_FINAL_VIEWPOINT.md": "6b602ca8380a6ed37cce653a9940c55a0b83cf9ba1c6c7d218dd0e1347115b54"
+  },
+  "qualifiedSource": "47ec11df708e30f558cb0ce2a1374b15e8ddb62e",
+  "qualification": {
+    "ordinaryJob": 135308641058,
+    "ordinaryTests": 88,
+    "focusedJob": 135308664965,
+    "sourceTests": 38,
+    "normalFreshInstalledTests": 38,
+    "actualE11Source": 1,
+    "actualE11InstalledServe": 1,
+    "actualE07Job": 135308665093,
+    "actualE08Job": 135308665010,
+    "headChecks": "8 success",
+    "failures": 0,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "sourceReview": "clear: complete captured selected viewpoint edition/body/digest before policy; exact key set compared in existing final coherent snapshot after Consent; cached and new paths retain original effects, separate request reauthorizes saved and now-current subjects; no whole project/current human/recursive/distributed fence claim"
+}
