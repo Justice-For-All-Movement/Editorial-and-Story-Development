@@ -686,13 +686,24 @@
     },
     {
       "id": "export-final-selected-viewpoint",
-      "status": "incomplete WIP baseline regressions; runtime correction pending",
+      "status": "incomplete WIP correction; source-installed/final-head qualification pending",
       "baseCommit": "1d214a0c595425eddacb1aa2a8baaef5986597aa",
       "documentation": "docs/EXPORT_FINAL_VIEWPOINT.md",
       "remaining": [
         "baseline/correction/source-installed/final-head CI/review/rules/expected merge",
         "whole project/credits/asset/recursive E09/current human/host/orphan uncertainty separate"
-      ]
+      ],
+      "baselineSource": "05be25072d515a5a4882e24f13a63a8bf2c436e1",
+      "baselineJob": 135307608418,
+      "baselineResults": {
+        "tests": 38,
+        "passes": 34,
+        "failures": 4,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "verification": "docs/export-final-viewpoint-verification.json",
+      "local": "typecheck/build/registry passed with prepared dependencies only; no local PG/fresh/full suite claim"
     }
   ],
   "approvedDesignSha256": {

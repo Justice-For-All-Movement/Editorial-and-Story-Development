@@ -611,7 +611,7 @@ export function createEngine(deps: EditorialDeps) {
   const summaryOf = (o: ObjRow & { stale: boolean; blocked: boolean }): Summary => ({ ref: uref(EID, o.kind, o.id, o.revision), id: o.id, kind: o.kind, revision: o.revision, state: o.state, title: o.title, docType: o.doc_type, language: o.language, editorialProjectId: o.editorial_project_id, translationOf: o.parent_document_id, stale: o.stale, blocked: o.blocked, updatedAt: iso(o.updated_at) });
   const toApproval = (r: Record<string, unknown>, kind: Kind): Approval => ({ id: r.id as string, ref: uref(EID, 'approval', r.id as string), objectRef: uref(EID, kind, r.object_id as string, r.revision as number), revision: r.revision as number, digest: r.digest as string, status: r.status as Approval['status'], approverId: r.approver_id as string, note: (r.note as string | null) ?? null, at: iso(r.at), invalidatedReason: (r.invalidated_reason as string | null) ?? null, invalidatedCause: (r.invalidated_cause as string | null) ?? null });
 
-  async function exportView(q: Sql, ctx: ServiceContext, l: Loaded): Promise<{ doc: ExportDocument; project: Loaded; viewpoints: Map<string, ViewpointBody> }> {
+  async function exportView(q: Sql, ctx: ServiceContext, l: Loaded): Promise<{ doc: ExportDocument; project: Loaded; viewpoints: Map<string, ViewpointBody>; viewpointBasis: ReadonlyMap<string, string> }> {
     const body = l.r.body as DocumentBody;
     const project = await need(q, ctx, 'editorial_project', body.editorialProjectId);
     const pb = project.r.body as ProjectBody;
@@ -621,20 +621,23 @@ export function createEngine(deps: EditorialDeps) {
       credits.push({ name: col.r.body.name, role: c.role, creditLine: c.creditLine ?? col.r.body.creditLine });
     }
     const viewpoints = new Map<string, ViewpointBody>();
+    const viewpointBasis = new Map<string, string>();
     for (const id of new Set(body.blocks.map((b) => b.viewpointId).filter((x): x is string => x !== undefined))) {
       const v = await need(q, ctx, 'viewpoint', id);
       viewpoints.set(id, v.r.body);
+      // Own a complete edition/body fingerprint before any export policy callback.
+      viewpointBasis.set(id, bodyDigest({ revision: v.r.revision, digest: v.r.digest, body: v.r.body }));
     }
     const blocks: ExportBlock[] = body.blocks.map((b) => { const v = b.viewpointId === undefined ? undefined : viewpoints.get(b.viewpointId); return v === undefined ? b : { ...b, viewpoint: { id: b.viewpointId as string, label: v.label, attribution: v.attribution } }; });
     const n = pb.projectKind === 'satire' ? notice(body.language, 'satire') : pb.projectKind === 'campaign' ? notice(body.language, 'campaign').replace('{identity}', pb.publishingIdentity) : null;
-    return { project, viewpoints, doc: {
+    return { project, viewpoints, viewpointBasis, doc: {
       document: { ref: uref(EID, 'document', l.o.id, l.r.revision), id: l.o.id, revision: l.r.revision, title: body.title, docType: body.docType, language: body.language, reviewState: l.r.review_state, translationOf: body.translationOf === undefined ? null : { ref: uref(EID, 'document', body.translationOf.documentId, body.translationOf.revision) } },
       labels: { projectKind: pb.projectKind, format: pb.format, publishingIdentity: pb.publishingIdentity, projectTitle: pb.title, notice: n },
       credits, blocks, disclosures: collectDisclosures(body.blocks), sources: [...new Set(body.blocks.flatMap((b) => b.sources))],
     } };
   }
   /** Final own-engine admission and visibility only. Legacy acknowledgements retain all historical credit obligations. */
-  async function finalExportAdmission(ctx: ServiceContext, id: string, revision: number, result: ExportResult, requireApproved: boolean): Promise<void> {
+  async function finalExportAdmission(ctx: ServiceContext, id: string, revision: number, result: ExportResult, requireApproved: boolean, viewpointBasis: ReadonlyMap<string, string>): Promise<void> {
     await sql.tx(async tx => {
       // A fresh coherent own-DB snapshot begins AFTER export COMMIT and the final host callback.
       await tx.query('set transaction isolation level repeatable read read only');
@@ -676,7 +679,12 @@ export function createEngine(deps: EditorialDeps) {
       for (const collaborator of [...collaborators].sort()) await need(tx, ctx, 'collaborator', collaborator);
       const viewpoints = [...new Set(selected.r.body.blocks.flatMap(b => b.viewpointId === undefined ? [] : [b.viewpointId]))].sort();
       invariant(viewpoints.length <= 1024, 'unavailable', 'Complete export visibility exceeds its budget');
-      for (const viewpoint of viewpoints) await need(tx, ctx, 'viewpoint', viewpoint);
+      invariant(viewpoints.length === viewpointBasis.size, 'consent_denied', 'The selected export viewpoint basis changed');
+      for (const id of viewpoints) {
+        const current = await need(tx, ctx, 'viewpoint', id);
+        invariant(bodyDigest({ revision: current.r.revision, digest: current.r.digest, body: current.r.body }) === viewpointBasis.get(id),
+          'consent_denied', 'The selected export viewpoint basis changed; request a fresh review');
+      }
     });
   }
   function applyProposal(body: DocumentBody, p: SuggestionProposal, block: Block): DocumentBody {
@@ -990,6 +998,7 @@ export function createEngine(deps: EditorialDeps) {
       const factPorts = captureExportFactPorts();
       let finalFacts: Pick<Block, 'basis' | 'sources'>[] = [];
       let finalUse: (() => Promise<Json>) | undefined;
+      let finalViewpoints: ReadonlyMap<string, string> = new Map();
       const { idempotencyKey, ...rest } = options;
       const result = await sql.tx(async (tx) => {
         // Replays disclose private content too: current authority must precede the cache.
@@ -1007,6 +1016,7 @@ export function createEngine(deps: EditorialDeps) {
         if (options.requireApproved === true) invariant(approval !== null && approval.status === 'active' && approval.digest === l.r.digest, 'approval_invalid', approval === null ? `Revision ${l.r.revision} has no approval` : `The approval of revision ${l.r.revision} is ${approval.status}`);
         // Own dependency visibility must pass before current external source callbacks and cached disclosure.
         const view = await exportView(tx, ctx, l);
+        finalViewpoints = view.viewpointBasis;
         // Keep original selected obligations, independent of cached result and callback mutation.
         finalFacts = body.blocks.map(block => ({ basis: block.basis, sources: [...block.sources] }));
         await currentExportFacts(ctx, finalFacts, factPorts);
@@ -1055,7 +1065,7 @@ export function createEngine(deps: EditorialDeps) {
       await authorize();
       await currentExportFacts(ctx, finalFacts, factPorts);
       if (finalUse !== undefined) await finalUse();
-      await finalExportAdmission(ctx, documentId, revision, result, options.requireApproved === true);
+      await finalExportAdmission(ctx, documentId, revision, result, options.requireApproved === true, finalViewpoints);
       return result;
     },
     async listExports(ctx: ServiceContext, documentId: string): Promise<ExportManifest[]> {
