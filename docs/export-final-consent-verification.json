@@ -1,0 +1,26 @@
+{
+  "status": "incomplete WIP source-installed/CI-review-merge pending",
+  "baselineSource": "4ef02dfc1595995539f2870901af39df184222bb",
+  "baselineJob": 135302247892,
+  "baselineResults": {
+    "tests": 29,
+    "passes": 27,
+    "failures": 2,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "local": "typecheck/build/originalregistry pass with prepared dependencies; no local PG/fresh/full suite claim",
+  "limits": [
+    "original declared subject set only; current whole selected/viewpoint basis not yet compared",
+    "private adapt review literal/not allow; publish review deny/standalone unchecked/no dispatch",
+    "current-human/recursive/host/orphan uncertainty separate; no distributed fence",
+    "unknown not rollback or auto retry/delete/reset/cleanup authority"
+  ],
+  "sha256": {
+    "src/engine/index.ts": "ade62ef6a84df17bba09ed46f416d6acd23e51648a00f0855310e1171c95f6d6",
+    "tests/export-final-consent.test.ts": "e96b7daf899c17f98c64e548d50b08e9b745b7912cc3165c072a0ecc1f2f5430",
+    ".github/workflows/ci.yml": "f6098367c4c13ab6ead9ec1981948f5983e5c5f24bde8458ff8dd2afb9e51f87",
+    "docs/ENGINE_API.md": "32d618d71f0c692327f0b0662917fcd0a182fe8b7f5872e6a53917822501e940",
+    "docs/EXPORT_FINAL_CONSENT.md": "a9af5ee5865d7b49b061d29381149cd3118552ad413608decea89078c3a644cb"
+  }
+}

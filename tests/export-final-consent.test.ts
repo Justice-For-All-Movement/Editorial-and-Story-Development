@@ -36,3 +36,36 @@ for (const at of ['put', 'final-host'] as const) test(`export rechecks originall
   assert.deepEqual((await e.exportDocument(ctx(), d.id, 1, options)).manifest, original);
   assert.equal(puts, 1); assert.deepEqual(await effects(), [{ exports: 1, audits: 1, events: 1 }]);
 }));
+
+for (const mode of ['remove', 'throw', 'unknown', 'adapt-review', 'publish-review'] as const) test(`final Consent preserves captured scope and handles ${mode} without new effects`, needsPg, () => withDisposableDatabase(pg, ADMIN, async (_url, sql) => {
+  await migrate(sql); let bad = false, checking = false, puts = 0;
+  const policy = useDecisions(); const seen: unknown[] = [];
+  const selected = { async decide(c: any, request: any): Promise<any> {
+    assert.equal(this, selected);
+    if (checking) { assert.ok(Object.isFrozen(c)); assert.ok(Object.isFrozen(request)); assert.ok(Object.isFrozen(request.subjects)); seen.push(structuredClone(request)); }
+    if (bad) {
+      if (mode === 'throw') throw Error('SYNTHETIC_PRIVATE_CONSENT');
+      const original = await policy.decide(c, request);
+      return { ...original, decision: mode === 'unknown' ? 'not_checked' : mode.endsWith('review') ? 'review' : 'deny' };
+    }
+    return policy.decide(c, request);
+  } };
+  const ports: { useDecisions?: typeof selected } = { useDecisions: selected };
+  const objects: ObjectStore = { async put(key, bytes) { puts++; bad = true; if (mode === 'remove') delete ports.useDecisions; return { key, size: bytes.byteLength, sha256: createHash('sha256').update(bytes).digest('hex') }; }, async get() { throw Error('no reads'); }, async head() { return null; }, async list() { return []; }, async delete() { throw Error('no deletion'); } };
+  const e = createEngine({ sql, ports, objects, config: { standalone: { useDecisions: true } } });
+  const p = await e.create(ctx(), 'editorial_project', { body: project() });
+  const d = await e.create(ctx(), 'document', { body: { title: 'Fictional scoped private export', editorialProjectId: p.id, docType: 'article', language: 'en', blocks: [block('t', { basis: 'attributed_testimony', attribution: 'Fictional source', sources: [SEGMENT_INTERVIEW] })] } });
+  checking = true;
+  const options = { intendedUse: mode === 'publish-review' ? 'publish' as const : 'adapt' as const, audience: 'private-test', territory: 'fictional-territory', destination: 'private-workspace', idempotencyKey: `captured-final-consent-${mode}` };
+  if (mode === 'adapt-review') {
+    const ack = await e.exportDocument(ctx(), d.id, 1, options);
+    assert.equal((ack.manifest.useDecisions[0] as any).decision, 'allow', 'original manifest decision stays historical, never rewritten to the final review');
+  } else await assert.rejects(e.exportDocument(ctx(), d.id, 1, options), (error: any) => {
+    assert.equal(error.code, mode === 'unknown' ? 'unavailable' : 'consent_denied'); assert.ok(!String(error).includes('SYNTHETIC_PRIVATE_CONSENT')); return true;
+  });
+  assert.equal(puts, 1); assert.equal(seen.length, 2); assert.deepEqual(seen[0], seen[1]);
+  assert.deepEqual(seen[1], { subjects: [SEGMENT_INTERVIEW], action: options.intendedUse, purpose: 'editorial', audience: 'private-test', territory: 'fictional-territory', destination: 'private-workspace' });
+  const original = (await e.listExports(ctx(), d.id))[0]!; bad = false; ports.useDecisions = selected;
+  assert.deepEqual((await e.exportDocument(ctx(), d.id, 1, options)).manifest, original);
+  assert.equal(puts, 1); assert.equal((await e.listExports(ctx(), d.id)).length, 1);
+}));

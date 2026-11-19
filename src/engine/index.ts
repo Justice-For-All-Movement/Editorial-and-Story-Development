@@ -224,6 +224,35 @@ export function createEngine(deps: EditorialDeps) {
     return { decision: d.decision, reasons: [...d.reasons], permissionRefs: [...d.permissionRefs], restrictions: [...d.restrictions], decidedAt: d.decidedAt, subjects: [...subjects], action };
   }
 
+  /** Same original declared request, fresh decision each time; no mid-request standalone downgrade. */
+  function captureExportUse(ctx: ServiceContext, subjects: readonly string[], action: UseAction,
+    extra: { audience?: string; territory?: string; destination?: string }): () => Promise<Json> {
+    const request = Object.freeze({ subjects: Object.freeze([...subjects]), action, purpose: ctx.purpose, ...extra });
+    let port: UseDecisionPort | undefined, method: UseDecisionPort['decide'] | undefined, standalone = false;
+    try {
+      port = ports.useDecisions; method = port?.decide;
+      standalone = port === undefined && cfg.standalone?.useDecisions === true;
+      invariant(port === undefined || typeof method === 'function', 'unavailable', 'Invalid export use-decision port');
+    } catch { throw new DomainError('unavailable', 'Export use-decision port is unavailable'); }
+    return async () => {
+      if (method === undefined) {
+        invariant(standalone, 'unavailable', 'An export use-decision service is required');
+        return { decision: 'not_checked', mode: 'standalone', subjects: [...request.subjects], action };
+      }
+      try {
+        const value = await method.call(port, ctx, request);
+        const decision = value.decision;
+        invariant(decision !== 'deny', 'consent_denied', 'Export permission was denied');
+        invariant(decision === 'allow' || decision === 'review', 'unavailable', 'Export received an invalid use decision');
+        invariant(action !== 'publish' || decision !== 'review', 'consent_denied', 'Publishing requires completed Consent review');
+        return { decision, reasons: [...value.reasons], permissionRefs: [...value.permissionRefs], restrictions: [...value.restrictions], decidedAt: value.decidedAt, subjects: [...request.subjects], action };
+      } catch (error) {
+        throw new DomainError(error instanceof DomainError && error.code === 'unavailable' ? 'unavailable' : 'consent_denied',
+          'Current permission for declared export dependencies could not be obtained');
+      }
+    };
+  }
+
   function captureExportFactPorts() {
     try {
       const knowledgePort = ports.knowledge, findingPort = ports.findings;
@@ -956,6 +985,7 @@ export function createEngine(deps: EditorialDeps) {
       await authorize();
       const factPorts = captureExportFactPorts();
       let finalFacts: Pick<Block, 'basis' | 'sources'>[] = [];
+      let finalUse: (() => Promise<Json>) | undefined;
       const { idempotencyKey, ...rest } = options;
       const result = await sql.tx(async (tx) => {
         // Replays disclose private content too: current authority must precede the cache.
@@ -986,18 +1016,9 @@ export function createEngine(deps: EditorialDeps) {
           'unavailable', 'Export dependencies exceed the complete decision request budget');
         const useDecisions: Json[] = [];
         if (subjects.length > 0) {
-          let decision: Json;
-          try { decision = await useDecision(ctx, Object.freeze([...subjects]), intendedUse, extra); }
-          catch (error) {
-            throw new DomainError(error instanceof DomainError && error.code === 'unavailable' ? 'unavailable' : 'consent_denied',
-              'Current permission for all declared export dependencies could not be obtained');
-          }
-          invariant(isRec(decision) && (decision.decision === 'allow' || decision.decision === 'review'
-            || (ports.useDecisions === undefined && cfg.standalone?.useDecisions === true && decision.decision === 'not_checked')),
-            'unavailable', 'Export received an invalid use decision');
-          // Existing private adapt review remains explicitly review; it is not an allow or a publication permit.
-          if (intendedUse === 'publish' && decision.decision === 'review') throw new DomainError('consent_denied', 'Publishing requires a consent review that has not been completed');
-          useDecisions.push(decision);
+          // Subject/count/byte validation above precedes port or credential callbacks.
+          finalUse = captureExportUse(ctx, subjects, intendedUse, extra);
+          useDecisions.push(await finalUse());
         }
         return idem(tx, ctx, idempotencyKey, { op: 'export', documentId, revision, ...rest }, async () => {
           const renderings: ExportResult['renderings'] = {};
@@ -1029,6 +1050,7 @@ export function createEngine(deps: EditorialDeps) {
       // A committed export remains retained even when no content can be returned to this caller.
       await authorize();
       await currentExportFacts(ctx, finalFacts, factPorts);
+      if (finalUse !== undefined) await finalUse();
       await finalExportAdmission(ctx, documentId, revision, result, options.requireApproved === true);
       return result;
     },
