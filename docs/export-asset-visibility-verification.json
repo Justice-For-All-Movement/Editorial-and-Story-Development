@@ -1,0 +1,44 @@
+{
+  "status": "104 ordinary/54 source-installed runtime qualified; final head CI pending",
+  "baselineSource": "54c20a0caca9971d46180e8d56ff31b447e0b6e6",
+  "baselineFocused": {
+    "job": 135574053655,
+    "tests": 53,
+    "passes": 45,
+    "failures": 8,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "baselineOrdinary": {
+    "job": 135574053808,
+    "tests": 103,
+    "passes": 95,
+    "failures": 8,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "baselineQualification": "all eight Missing expected rejection; later retention/replay assertions not reached; ninth exact-missing test added only in runtime",
+  "runtimeSource": "5d54ce941bd0ecb8889e3e7ecfcc1570b2f140a1",
+  "qualification": {
+    "ordinaryJob": 135575060089,
+    "ordinaryTests": 104,
+    "focusedJob": 135575023811,
+    "sourceTests": 54,
+    "normalFreshInstalledTests": 54,
+    "actualE11Source": 1,
+    "actualE11InstalledServe": 1,
+    "failures": 0,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "sha256": {
+    "src/engine/index.ts": "886c4e65e473388014bdc45af39d67acbbd5ceb23258ccbe3916dc0d6bb3bc54",
+    "tests/export-asset-visibility.test.ts": "89c1e7f321c837cd253533d2eb96b9c501ac289e9d16878a55f92c81246ac5f4",
+    ".github/workflows/ci.yml": "c82dd70f00c9a820104c91279e58401cdb1b641677fa21185d2a8ec196713da0",
+    "docs/ENGINE_API.md": "790706ff81994691fc017a6c0cab8464e33bae86349b6e48588bdaade75e09ab",
+    "docs/EXPORT_ASSET_VISIBILITY.md": "9cd4aba668eeb6774a95cde3b111579d891ca8f98c6bb5fffa69a114b1d9c96a"
+  },
+  "sourceReview": "direct registered assets before source callbacks/cache and final coherent snapshot; exact selected editions/no system or latest fallback; whole registered-set limits before asset queries; broader metadata/approval/rights/recursive/human/fence unqualified",
+  "local": "prepared typecheck/build PASS; no localPG/fresh/fullsuite",
+  "limits": "budget edges source-reviewed only; not direct asset content/approval/target-rights/recursive/currenthuman/rights/historicalcontributors/host/sandbox/fence/HTTPbrowserATlive proof; retain committed effects/no cleanup/retry authority"
+}

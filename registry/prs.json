@@ -830,14 +830,46 @@
     },
     {
       "id": "export-direct-registered-asset-visibility",
-      "status": "incomplete WIP; baseline/correction/source-installed/full head CI pending",
+      "status": "104 ordinary/54 source-installed runtime qualified; final head CI pending",
       "baseCommit": "879c613c9d5d81594d0a59ca3523f0d20a5a549c",
       "documentation": "docs/EXPORT_ASSET_VISIBILITY.md",
       "local": "prepared typecheck/build PASS; no localPG/fresh/fullsuite",
       "remaining": [
         "actual own PostgreSQL/source-normal-installed/full current-head CI/review/rules/expected merge",
         "direct asset content/approval/current target-rights/recursive/historical contributor/currenthuman/host/sandbox/fence acceptance separate"
-      ]
+      ],
+      "baselineSource": "54c20a0caca9971d46180e8d56ff31b447e0b6e6",
+      "baselineFocused": {
+        "job": 135574053655,
+        "tests": 53,
+        "passes": 45,
+        "failures": 8,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "baselineOrdinary": {
+        "job": 135574053808,
+        "tests": 103,
+        "passes": 95,
+        "failures": 8,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "runtimeSource": "5d54ce941bd0ecb8889e3e7ecfcc1570b2f140a1",
+      "qualification": {
+        "ordinaryJob": 135575060089,
+        "ordinaryTests": 104,
+        "focusedJob": 135575023811,
+        "sourceTests": 54,
+        "normalFreshInstalledTests": 54,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "direct registered assets before source callbacks/cache and final coherent snapshot; exact selected editions/no system or latest fallback; whole registered-set limits before asset queries; broader metadata/approval/rights/recursive/human/fence unqualified",
+      "verification": "docs/export-asset-visibility-verification.json"
     }
   ],
   "approvedDesignSha256": {
