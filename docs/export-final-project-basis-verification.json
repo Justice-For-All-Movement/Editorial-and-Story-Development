@@ -1,0 +1,39 @@
+{
+  "status": "implementation/source/package qualification complete; GitHub governs current CI/readiness/merge; staged WIP notes historical",
+  "baselineSource": "1f31ac4e64b1386be0e2fa22674e8f6b282a0b24",
+  "local": "prepared typecheck/build/registry only; no localPG/fresh/fullsuite",
+  "limits": "selected current project/rendered-credit only; historical visibility preserved; no historical contributor rights/currenthuman/recursive/assets/fence/cleanup/reset/delete/retry authority",
+  "sha256": {
+    "src/engine/index.ts": "9c04dacfe14a2484a8c347737680db646b0154059745fcd519f06d4c5c1a39b3",
+    "tests/export-final-project-basis.test.ts": "34cca54c30b80ca51e377b812f15397566203105fd04608288eaa1ed30d782e9",
+    ".github/workflows/ci.yml": "2e77613f4765e7bdb167d77dacb48735e79ff3e004c445c3dfbbfceed6c01560",
+    "docs/ENGINE_API.md": "ee4c1be9a89d4c4a3dfbc314b4dc37185f74e158db3e200231cbf41e68e82414",
+    "docs/EXPORT_FINAL_PROJECT_BASIS.md": "c814fdf9bc94e94e6516f1bd58f323d1022f616a95f1bfbd4fe34bdfe02be5a0"
+  },
+  "initialBaseline": {
+    "source": "1f31ac4e64b1386be0e2fa22674e8f6b282a0b24",
+    "job": 135348748409,
+    "tests": 42,
+    "passes": 38,
+    "failures": 4,
+    "cancelled": 0,
+    "skips": 0,
+    "qualification": "2 collaborator missing-rejection repros, 2 project fixture unknown description errors; fixture uses supported title now, no relaxed assertions"
+  },
+  "qualifiedSource": "82e01b187a5a8cdf43c354b022b790b56a44a7cf",
+  "qualification": {
+    "ordinaryJob": 135349888238,
+    "ordinaryTests": 92,
+    "focusedJob": 135349888093,
+    "sourceTests": 42,
+    "normalFreshInstalledTests": 42,
+    "actualE11Source": 1,
+    "actualE11InstalledServe": 1,
+    "actualE07Job": 135349887781,
+    "actualE08Job": 135349888203,
+    "headChecks": "8 success",
+    "failures": 0,
+    "cancelled": 0,
+    "skips": 0
+  }
+}
