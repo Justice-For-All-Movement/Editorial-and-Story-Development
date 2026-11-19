@@ -769,13 +769,12 @@
     },
     {
       "id": "export-storage-error-privacy",
-      "status": "95 ordinary/45 source-installed and E07/E08/E11 runtime qualified; final head CI pending",
+      "status": "accepted PR14; staged pending notes historical",
       "baseCommit": "7a603eb4611655ead81488ea979512c3385f0955",
       "documentation": "docs/EXPORT_STORAGE_ERRORS.md",
       "local": "prepared typecheck/build passed; no localPG/fresh/fullsuite",
       "remaining": [
-        "fresh final documentation-head CI/review/rules/expected merge",
-        "unknown bytes retained; no HTTP/orphan reconciliation/receipt/stopped-nooutput/liveness/atomicity/currenthuman/rights/sandbox/host/cleanup/retry qualification"
+        "unknown bytes retained; no HTTP/orphan/receipt/stopped-nooutput/liveness/atomicity/currenthuman/rights/sandbox/host/cleanup/retry qualification"
       ],
       "baselineSource": "83d5af3f0dd6e43a1835af11aa9a13c77f656de7",
       "baselineFocused": {
@@ -812,7 +811,33 @@
         "failures": 0,
         "cancelled": 0,
         "skips": 0
+      },
+      "sourceCommit": "0da5b2f4f3113c978abe56df2dbd461f72554096",
+      "mergeCommit": "879c613c9d5d81594d0a59ca3523f0d20a5a549c",
+      "finalCi": {
+        "ordinaryJob": 135546111361,
+        "ordinaryTests": 95,
+        "focusedJob": 135546083456,
+        "sourceTests": 45,
+        "normalFreshInstalledTests": 45,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "headChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
       }
+    },
+    {
+      "id": "export-direct-registered-asset-visibility",
+      "status": "incomplete WIP; baseline/correction/source-installed/full head CI pending",
+      "baseCommit": "879c613c9d5d81594d0a59ca3523f0d20a5a549c",
+      "documentation": "docs/EXPORT_ASSET_VISIBILITY.md",
+      "local": "prepared typecheck/build PASS; no localPG/fresh/fullsuite",
+      "remaining": [
+        "actual own PostgreSQL/source-normal-installed/full current-head CI/review/rules/expected merge",
+        "direct asset content/approval/current target-rights/recursive/historical contributor/currenthuman/host/sandbox/fence acceptance separate"
+      ]
     }
   ],
   "approvedDesignSha256": {
