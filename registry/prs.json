@@ -632,11 +632,10 @@
     },
     {
       "id": "export-final-declared-consent",
-      "status": "source and package qualified candidate; final documentation-head CI/review/rules/expected merge pending",
+      "status": "accepted PR11; final-head CI/rules/expected merge passed; candidate-pending notes historical",
       "baseCommit": "afa3736eede95f9b5cdf23c7e913ce935bd31882",
       "documentation": "docs/EXPORT_FINAL_CONSENT.md",
       "remaining": [
-        "final documentation-head CI/review/rules/expected merge",
         "complete current viewpoint/selected basis comparison, recursive E09, current human/host/orphan uncertainty remain separate"
       ],
       "baselineSource": "4ef02dfc1595995539f2870901af39df184222bb",
@@ -666,7 +665,34 @@
         "cancelled": 0,
         "skips": 0
       },
-      "sourceReview": "clear: original request/method/receiver/initial standalone captured after complete budget; fresh postCOMMIT/finalhost/facts before own final admission; retained historical ACK/effects; no full current basis-human-recursive/distributed fence claim"
+      "sourceReview": "clear: original request/method/receiver/initial standalone captured after complete budget; fresh postCOMMIT/finalhost/facts before own final admission; retained historical ACK/effects; no full current basis-human-recursive/distributed fence claim",
+      "sourceCommit": "3b8dfa8a6d9661ef41321fbf49550397da1781f2",
+      "mergeCommit": "1d214a0c595425eddacb1aa2a8baaef5986597aa",
+      "finalCi": {
+        "ordinaryJob": 135306220216,
+        "ordinaryTests": 84,
+        "focusedJob": 135306219859,
+        "sourceTests": 34,
+        "normalFreshInstalledTests": 34,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "actualE07Job": 135306220176,
+        "actualE08Job": 135306220414,
+        "headChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
+    },
+    {
+      "id": "export-final-selected-viewpoint",
+      "status": "incomplete WIP baseline regressions; runtime correction pending",
+      "baseCommit": "1d214a0c595425eddacb1aa2a8baaef5986597aa",
+      "documentation": "docs/EXPORT_FINAL_VIEWPOINT.md",
+      "remaining": [
+        "baseline/correction/source-installed/final-head CI/review/rules/expected merge",
+        "whole project/credits/asset/recursive E09/current human/host/orphan uncertainty separate"
+      ]
     }
   ],
   "approvedDesignSha256": {
