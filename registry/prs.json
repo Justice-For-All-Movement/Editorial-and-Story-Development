@@ -769,13 +769,13 @@
     },
     {
       "id": "export-storage-error-privacy",
-      "status": "baseline reproduced; runtime committed, actual source-installed/full head CI pending",
+      "status": "95 ordinary/45 source-installed and E07/E08/E11 runtime qualified; final head CI pending",
       "baseCommit": "7a603eb4611655ead81488ea979512c3385f0955",
       "documentation": "docs/EXPORT_STORAGE_ERRORS.md",
       "local": "prepared typecheck/build passed; no localPG/fresh/fullsuite",
       "remaining": [
-        "actual owning PostgreSQL/source-normal-installed/full current-head CI/review/rules/expected merge",
-        "unknown object storage retained; no orphan reconciliation/receipt/stopped-nooutput/liveness/atomicity/currenthuman/rights/sandbox/host qualification or cleanup/retry authority"
+        "fresh final documentation-head CI/review/rules/expected merge",
+        "unknown bytes retained; no HTTP/orphan reconciliation/receipt/stopped-nooutput/liveness/atomicity/currenthuman/rights/sandbox/host/cleanup/retry qualification"
       ],
       "baselineSource": "83d5af3f0dd6e43a1835af11aa9a13c77f656de7",
       "baselineFocused": {
@@ -796,7 +796,23 @@
       },
       "runtimeSource": "471fe17dc4a38f880a85bf477679dfdcc186788e",
       "verification": "docs/export-storage-error-verification.json",
-      "sourceReview": "selected optional store and put method/receiver for actual new write; getter-invalid-rejected callbacks sanitized; no trust in callback DomainError; byte retention/SQL uncertainty explicit; permissions/current/final admission unchanged"
+      "sourceReview": "selected optional store and put method/receiver for actual new write; getter-invalid-rejected callbacks sanitized; no trust in callback DomainError; byte retention/SQL uncertainty explicit; permissions/current/final admission unchanged",
+      "qualification": {
+        "ordinaryJob": 135544484075,
+        "ordinaryTests": 95,
+        "focusedJob": 135544483623,
+        "sourceTests": 45,
+        "normalFreshInstalledTests": 45,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "actualE07Job": 135544484233,
+        "actualE08Job": 135544484079,
+        "E07E08SourceInstalledEach": 1,
+        "headChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
     }
   ],
   "approvedDesignSha256": {
