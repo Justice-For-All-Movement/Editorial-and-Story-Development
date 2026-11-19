@@ -239,17 +239,21 @@ export function createEngine(deps: EditorialDeps) {
         invariant(standalone, 'unavailable', 'An export use-decision service is required');
         return { decision: 'not_checked', mode: 'standalone', subjects: [...request.subjects], action };
       }
+      let copied: Json, admitted: 'allow' | 'review';
       try {
         const value = await method.call(port, ctx, request);
         const decision = value.decision;
         invariant(decision !== 'deny', 'consent_denied', 'Export permission was denied');
         invariant(decision === 'allow' || decision === 'review', 'unavailable', 'Export received an invalid use decision');
-        invariant(action !== 'publish' || decision !== 'review', 'consent_denied', 'Publishing requires completed Consent review');
-        return { decision, reasons: [...value.reasons], permissionRefs: [...value.permissionRefs], restrictions: [...value.restrictions], decidedAt: value.decidedAt, subjects: [...request.subjects], action };
+        admitted = decision;
+        copied = { decision, reasons: [...value.reasons], permissionRefs: [...value.permissionRefs], restrictions: [...value.restrictions], decidedAt: value.decidedAt, subjects: [...request.subjects], action };
       } catch (error) {
         throw new DomainError(error instanceof DomainError && error.code === 'unavailable' ? 'unavailable' : 'consent_denied',
           'Current permission for declared export dependencies could not be obtained');
       }
+      // Trusted local policy diagnosis remains explicit; callback diagnostics above stay sanitized.
+      invariant(action !== 'publish' || admitted !== 'review', 'consent_denied', 'Publishing requires a consent review that has not been completed');
+      return copied;
     };
   }
 
