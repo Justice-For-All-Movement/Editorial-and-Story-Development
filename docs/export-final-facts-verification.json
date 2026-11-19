@@ -1,5 +1,5 @@
 {
-  "status": "incomplete WIP corrected source-installed/CI/review/merge pending",
+  "status": "runtime source/installed qualified; final documentation-head CI/merge pending",
   "baselineSource": "18bfd13be94ba5860ec0ab7f87b65a57256c4a13",
   "baselineJob": 135280389180,
   "local": "one pure no-SQL getter group/typecheck/build/registry pass with prepared dependencies; no local PG/fresh/full suite claim",
@@ -13,6 +13,31 @@
     "tests/export-final-facts.test.ts": "e0e9b943130d9a11e823f7e7b35aaba20f7af344540cbf8c4818312c01c015c3",
     ".github/workflows/ci.yml": "8f12ffb0f7200c3e023cdf9c603fe3e6fa60f2a286ce889624ce5b5abb5c6191",
     "docs/ENGINE_API.md": "139756bab84d5816990ed580c3c394a262317e6c61ba3a5401ba12886ac6eecf",
-    "docs/EXPORT_FINAL_FACTS.md": "9f1f88c5a6725eef2f31701865d85a2276693747b767b2f1d3aab6b041abb607"
-  }
+    "docs/EXPORT_FINAL_FACTS.md": "976be9450d5890d9fc7f7dd94c2339d2b3d31d7c5ff08551cefba8d3a94c8a90"
+  },
+  "baselineResults": {
+    "tests": 24,
+    "passes": 20,
+    "failures": 4,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "qualifiedRuntimeCommit": "c57255f14b52ef11eb8704e81334ad768ad47f15",
+  "qualifiedCi": {
+    "ordinaryJob": 135281154145,
+    "ordinaryTests": 77,
+    "focusedJob": 135281154388,
+    "focusedSourceTests": 27,
+    "normalFreshInstalledTests": 27,
+    "actualE11Source": 1,
+    "actualE11InstalledServe": 1,
+    "actualE07Job": 135281154503,
+    "actualE08Job": 135281154415,
+    "actualE07E08SourceAndInstalledEach": 1,
+    "runtimeHeadChecks": "8 success",
+    "failures": 0,
+    "cancelled": 0,
+    "skips": 0
+  },
+  "sourceReview": "clear: original basis/source obligations copied before callbacks-cache; exact E07/E08 metadata before and after actual COMMIT/final host callback; configured method-receiver/standalone captured once; no getter/callback diagnostics leaked; retain original effects and own final admission after remote checks; sequential not all-source/current-human/fence"
 }

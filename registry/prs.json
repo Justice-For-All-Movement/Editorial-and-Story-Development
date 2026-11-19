@@ -576,7 +576,7 @@
     },
     {
       "id": "export-final-factual-metadata",
-      "status": "incomplete WIP correction; source-installed/full-final-head qualification pending",
+      "status": "runtime source/installed qualified; final documentation-head CI/merge pending",
       "baseCommit": "d50909f9c45ceb9ffe25e4da8779cf1b90619d0e",
       "documentation": "docs/EXPORT_FINAL_FACTS.md",
       "remaining": [
@@ -586,7 +586,32 @@
       "baselineSource": "18bfd13be94ba5860ec0ab7f87b65a57256c4a13",
       "baselineJob": 135280389180,
       "local": "one pure no-SQL getter group/typecheck/build/registry pass with prepared dependencies; no local PG/fresh/full suite claim",
-      "verification": "docs/export-final-facts-verification.json"
+      "verification": "docs/export-final-facts-verification.json",
+      "baselineResults": {
+        "tests": 24,
+        "passes": 20,
+        "failures": 4,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "qualifiedRuntimeCommit": "c57255f14b52ef11eb8704e81334ad768ad47f15",
+      "qualifiedCi": {
+        "ordinaryJob": 135281154145,
+        "ordinaryTests": 77,
+        "focusedJob": 135281154388,
+        "focusedSourceTests": 27,
+        "normalFreshInstalledTests": 27,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "actualE07Job": 135281154503,
+        "actualE08Job": 135281154415,
+        "actualE07E08SourceAndInstalledEach": 1,
+        "runtimeHeadChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear: original basis/source obligations copied before callbacks-cache; exact E07/E08 metadata before and after actual COMMIT/final host callback; configured method-receiver/standalone captured once; no getter/callback diagnostics leaked; retain original effects and own final admission after remote checks; sequential not all-source/current-human/fence"
     }
   ],
   "approvedDesignSha256": {
