@@ -32,7 +32,7 @@ for (const at of ['put', 'final-consent'] as const) for (const change of ['proje
     const p = await e.create(ctx(), 'editorial_project', { body: project({ credits: [{ collaboratorId: col.id, role: 'writer' }] }) });
     const d = await e.create(ctx(), 'document', { body: { title: 'Fictional selected viewpoint', editorialProjectId: p.id, docType: 'article', language: 'en', blocks: [block('t', { basis: 'attributed_testimony', attribution: 'Fictional source', sources: [SEGMENT_INTERVIEW], viewpointId: vp.id })] } });
     revise = async () => {
-      if (change === 'project') await e.revise(ctx(), 'editorial_project', p.id, { expectedRevision: 1, body: { ...p.body, description: 'Fictional changed private brief' } });
+      if (change === 'project') await e.revise(ctx(), 'editorial_project', p.id, { expectedRevision: 1, body: { ...p.body, title: 'Fictional changed private project title' } });
       else await e.revise(ctx(), 'collaborator', col.id, { expectedRevision: 1, body: { ...col.body, creditLine: 'Fictional changed credit' } });
     };
     const options = { audience: 'private-review', idempotencyKey: `fixed-viewpoint-${at}-${change}` };
