@@ -725,15 +725,30 @@
     },
     {
       "id": "export-final-project-credit-basis",
-      "status": "incomplete WIP correction; baseline/source-installed/head CI pending",
+      "status": "implementation/source/package qualification complete; GitHub governs current CI/readiness/merge; staged WIP notes historical",
       "baseCommit": "9b0a3378acb00b11a7c213d8e910fed43d29b4cb",
       "documentation": "docs/EXPORT_FINAL_PROJECT_BASIS.md",
       "remaining": [
-        "baseline/runtime/source-installed/current-head CI/review/rules/expected merge",
-        "historical contributor content-rights/recursive/assets/current-human/host acceptance separate"
+        "all historical contributor content-rights/recursive/assets/current-human/host acceptance separate"
       ],
       "baselineSource": "1f31ac4e64b1386be0e2fa22674e8f6b282a0b24",
-      "verification": "docs/export-final-project-basis-verification.json"
+      "verification": "docs/export-final-project-basis-verification.json",
+      "qualifiedSource": "82e01b187a5a8cdf43c354b022b790b56a44a7cf",
+      "qualification": {
+        "ordinaryJob": 135349888238,
+        "ordinaryTests": 92,
+        "focusedJob": 135349888093,
+        "sourceTests": 42,
+        "normalFreshInstalledTests": 42,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "actualE07Job": 135349887781,
+        "actualE08Job": 135349888203,
+        "headChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      }
     }
   ],
   "approvedDesignSha256": {
