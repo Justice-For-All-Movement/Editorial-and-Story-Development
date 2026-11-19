@@ -686,11 +686,11 @@
     },
     {
       "id": "export-final-selected-viewpoint",
-      "status": "incomplete WIP correction; source-installed/final-head qualification pending",
+      "status": "source and package qualified candidate; final documentation-head CI/review/rules/expected merge pending",
       "baseCommit": "1d214a0c595425eddacb1aa2a8baaef5986597aa",
       "documentation": "docs/EXPORT_FINAL_VIEWPOINT.md",
       "remaining": [
-        "baseline/correction/source-installed/final-head CI/review/rules/expected merge",
+        "final documentation-head CI/review/rules/expected merge",
         "whole project/credits/asset/recursive E09/current human/host/orphan uncertainty separate"
       ],
       "baselineSource": "05be25072d515a5a4882e24f13a63a8bf2c436e1",
@@ -703,7 +703,24 @@
         "skips": 0
       },
       "verification": "docs/export-final-viewpoint-verification.json",
-      "local": "typecheck/build/registry passed with prepared dependencies only; no local PG/fresh/full suite claim"
+      "local": "typecheck/build/registry passed with prepared dependencies only; no local PG/fresh/full suite claim",
+      "qualifiedSource": "47ec11df708e30f558cb0ce2a1374b15e8ddb62e",
+      "qualification": {
+        "ordinaryJob": 135308641058,
+        "ordinaryTests": 88,
+        "focusedJob": 135308664965,
+        "sourceTests": 38,
+        "normalFreshInstalledTests": 38,
+        "actualE11Source": 1,
+        "actualE11InstalledServe": 1,
+        "actualE07Job": 135308665093,
+        "actualE08Job": 135308665010,
+        "headChecks": "8 success",
+        "failures": 0,
+        "cancelled": 0,
+        "skips": 0
+      },
+      "sourceReview": "clear: complete captured selected viewpoint edition/body/digest before policy; exact key set compared in existing final coherent snapshot after Consent; cached and new paths retain original effects, separate request reauthorizes saved and now-current subjects; no whole project/current human/recursive/distributed fence claim"
     }
   ],
   "approvedDesignSha256": {
