@@ -611,8 +611,26 @@ export function createEngine(deps: EditorialDeps) {
   const summaryOf = (o: ObjRow & { stale: boolean; blocked: boolean }): Summary => ({ ref: uref(EID, o.kind, o.id, o.revision), id: o.id, kind: o.kind, revision: o.revision, state: o.state, title: o.title, docType: o.doc_type, language: o.language, editorialProjectId: o.editorial_project_id, translationOf: o.parent_document_id, stale: o.stale, blocked: o.blocked, updatedAt: iso(o.updated_at) });
   const toApproval = (r: Record<string, unknown>, kind: Kind): Approval => ({ id: r.id as string, ref: uref(EID, 'approval', r.id as string), objectRef: uref(EID, kind, r.object_id as string, r.revision as number), revision: r.revision as number, digest: r.digest as string, status: r.status as Approval['status'], approverId: r.approver_id as string, note: (r.note as string | null) ?? null, at: iso(r.at), invalidatedReason: (r.invalidated_reason as string | null) ?? null, invalidatedCause: (r.invalidated_cause as string | null) ?? null });
 
+  /** Direct registered panel assets only; external/recursive rights and content continuity are separate. */
+  async function requireExportAssetVisibility(q: Sql, ctx: ServiceContext, body: DocumentBody): Promise<void> {
+    const assets = new Map<string, ReturnType<typeof parseUref>>();
+    let bytes = 0;
+    for (const block of body.blocks) for (const panel of panelsOf(block)) for (const ref of panel.assetRefs) {
+      const selected = parseUref(ref);
+      if (selected.engine !== EID) continue;
+      invariant(selected.kind === 'asset', 'invalid_reference', 'Invalid registered export asset');
+      if (assets.has(ref)) continue;
+      assets.set(ref, selected); bytes += Buffer.byteLength(ref, 'utf8');
+      invariant(assets.size <= 1024 && bytes <= 64 * 1024, 'unavailable', 'Complete registered asset visibility exceeds its budget');
+    }
+    // Validate the whole bounded set before querying assets. Never replace a selected edition with latest.
+    for (const selected of assets.values()) await need(q, ctx, 'asset', selected.id,
+      selected.revision === undefined ? {} : { revision: selected.revision });
+  }
+
   async function exportView(q: Sql, ctx: ServiceContext, l: Loaded): Promise<{ doc: ExportDocument; project: Loaded; viewpoints: Map<string, ViewpointBody>; viewpointBasis: ReadonlyMap<string, string>; projectCreditBasis: ReadonlyMap<string, string> }> {
     const body = l.r.body as DocumentBody;
+    await requireExportAssetVisibility(q, ctx, body);
     const project = await need(q, ctx, 'editorial_project', body.editorialProjectId);
     const pb = project.r.body as ProjectBody;
     const projectCreditBasis = new Map<string, string>([[project.o.id, bodyDigest({ revision: project.r.revision, digest: project.r.digest, body: project.r.body })]]);
@@ -646,6 +664,7 @@ export function createEngine(deps: EditorialDeps) {
       const selected = await need(tx, ctx, 'document', id, { revision });
       invariant(result.manifest.document === uref(EID, 'document', id, revision) && result.manifest.contentDigest === selected.r.digest,
         'invalid_state', 'The retained export does not match its selected document');
+      await requireExportAssetVisibility(tx, ctx, selected.r.body);
       // This is own recorded admission, in the SAME fresh coherent snapshot as visibility.
       // The original export/manifest remains historical; a denial cannot roll its commit back.
       const links = await tx.query<{ ref: string }>(`select ref from ${S}.links where tenant_id=$1 and project_id=$2 and object_id=$3 and revision=$4`, [...scope(ctx), id, revision]);
