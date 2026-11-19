@@ -68,3 +68,20 @@ for (const exact of [false, true]) for (const at of ['before-new', 'before-cache
     assert.equal((await e.history(high, 'asset', asset.id)).length, 1);
   }));
 }
+
+test('exact missing registered asset edition is never substituted with the visible latest edition', needsPg, () => withDisposableDatabase(pg, ADMIN, async (_url, sql) => {
+  await migrate(sql); const policy = useDecisions(); const e = createEngine({ sql, ports: { useDecisions: policy } });
+  const asset = await e.create(ctx(), 'asset', { body: { title: 'Fictional exact panel', targetRef: 'E10:asset:fictional-exact@1',
+    mediaKind: 'image', provenance: 'original_production', rightsRef: 'E11:permission:fictional-exact@1' } });
+  await e.requestReview(ctx(), 'asset', asset.id, { expectedRevision: 1 }); await e.approve(editor(), 'asset', asset.id, { revision: 1 });
+  const p = await e.create(ctx(), 'editorial_project', { body: project() });
+  const d = await e.create(ctx(), 'document', { body: { title: 'Fictional missing edition', editorialProjectId: p.id, docType: 'storyboard',
+    language: 'en', blocks: [block('s', { type: 'scene', basis: 'invention', sources: [], disclosure: 'Fictional staged panel.',
+      data: { purpose: 'Opening', panels: [{ id: 'p', description: 'Fictional panel', assetRefs: ['E09:asset:' + asset.id + '@999'] }] } })] } });
+  const before = policy.calls.length;
+  await assert.rejects(e.exportDocument(ctx(), d.id, 1), (error: any) => error?.code === 'not_found');
+  assert.equal(policy.calls.length, before);
+  assert.equal((await e.get(ctx(), 'asset', asset.id)).revision, 1, 'latest is visible but is not the selected edition');
+  assert.equal((await e.listExports(ctx(), d.id)).length, 0);
+  assert.equal((await e.history(ctx(), 'document', d.id)).length, 1);
+}));
